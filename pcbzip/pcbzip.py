@@ -207,7 +207,7 @@ if __name__ == "__main__":
             
         else:
             zipFile = zipFiles()
-
+            gerbvFiles(zipFile, options.gerbview)
         
     #If the program throws a system exit exception
     except SystemExit:
