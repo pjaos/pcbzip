@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from   os import listdir, getcwd, system
-from   os.path import isfile, join, dirname, join, isfile
+from   os.path import isfile, join, dirname
 import zipfile
 import tempfile
 import shutil
