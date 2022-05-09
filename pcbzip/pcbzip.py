@@ -9,7 +9,6 @@ import wget
 import csv
 import contextlib
 import sqlite3
-import tempfile
 
 from   time import sleep, time
 from   os import listdir, getcwd, system, path, makedirs, remove, environ
@@ -349,10 +348,6 @@ class JCLPCBDatabase(object):
         id = 1
         fieldList = self._dBSearch.fieldList.split(",")
         for fName in fieldList:
-            if fName in DBSearch.DEFAULT_COLUMN_LIST:
-                default = "Yes"
-            else:
-                default = ""
             self._info("| {: <4} | {: <25} |".format(id, fName))
             id += 1
         self._info("-"*len(titleLine))
@@ -360,7 +355,7 @@ class JCLPCBDatabase(object):
     def _entercolumnWidthList(self):
         """@brief Allow the user to enter the size of each output column."""
         self._showSelectedFieldTable()
-
+        fieldList = self._dBSearch.fieldList.split(",")
         colListEntered = False
         while not colListEntered:
             response = self._uio.input("Enter a comma separated list of the sizes of each column: ")
