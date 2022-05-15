@@ -1,0 +1,4 @@
+build
+dist
+pcbzip.egg-info
+pcbzip/__pycache__
