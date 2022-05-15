@@ -217,7 +217,7 @@ file is updated.
 
 At this point you need to open a terminal window. The current state of the JLCPCB parts database should be downloaded using the following command so that you have an up to date copy.
 
-'''
+```
 INFO:  Created /home/auser/.jlcpcb
 INFO:  Downloading https://jlcpcb.com/componentSearch/uploadComponentInfo
 100% [......................................................................] 367284675 / 367284675INFO:  Took 29.1 seconds to download /home/auser/.jlcpcb/parts.csv
