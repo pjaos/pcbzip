@@ -110,15 +110,15 @@ def GetHomePath():
 
     return None
     
-class JCLPCBDatabase(object):
-    """@brief responsible for downloading searching the JCLPCB parts database."""
+class JLCPCBDatabase(object):
+    """@brief responsible for downloading searching the JLCPCB parts database."""
     
-    JCLPCB_CSV_FILENAME = "parts.csv"
-    JCLPCB_PARTS_FOLDER = join(GetHomePath(), ".jclpcb")
-    JCLPCB_CSV_DATE_FILE = join(JCLPCB_PARTS_FOLDER, JCLPCB_CSV_FILENAME + ".date")
-    JCLPCB_CSV_FILE = join(JCLPCB_PARTS_FOLDER, JCLPCB_CSV_FILENAME)
-    JCLPCB_SQLITE_DB_FILE = path.join(JCLPCB_PARTS_FOLDER, "parts.db")
-    JCLPCB_KICAD_HELP_PAGE = "https://support.jlcpcb.com/article/84-how-to-generate-the-bom-and-centroid-file-from-kicad"
+    JLCPCB_CSV_FILENAME = "parts.csv"
+    JLCPCB_PARTS_FOLDER = join(GetHomePath(), ".jlcpcb")
+    JLCPCB_CSV_DATE_FILE = join(JLCPCB_PARTS_FOLDER, JLCPCB_CSV_FILENAME + ".date")
+    JLCPCB_CSV_FILE = join(JLCPCB_PARTS_FOLDER, JLCPCB_CSV_FILENAME)
+    JLCPCB_SQLITE_DB_FILE = path.join(JLCPCB_PARTS_FOLDER, "parts.db")
+    JLCPCB_KICAD_HELP_PAGE = "https://support.jlcpcb.com/article/84-how-to-generate-the-bom-and-centroid-file-from-kicad"
     CSV_URL = "https://jlcpcb.com/componentSearch/uploadComponentInfo"
     
     # All fields in the database.
@@ -169,7 +169,7 @@ class JCLPCBDatabase(object):
             
     def updateAssyFiles(self):
         """@brief search for an update the assembly files."""
-        if self._mfg != JCLPCBDatabase.VENDOR_JCLPCB:
+        if self._mfg != JLCPCBDatabase.VENDOR_JLCPCB:
             raise Exception("Currently assembly files are only generated for JCBPCB")
         
         self._processPlcaementFile()
@@ -177,7 +177,7 @@ class JCLPCBDatabase(object):
        
     def _createTopLevel(self):
         """Create the meta table."""
-        with contextlib.closing(sqlite3.connect(JCLPCBDatabase.JCLPCB_SQLITE_DB_FILE)) as con:
+        with contextlib.closing(sqlite3.connect(JLCPCBDatabase.JLCPCB_SQLITE_DB_FILE)) as con:
             with con as cur:
                 cur.execute(
                     f"CREATE TABLE IF NOT EXISTS meta ('filename', 'size', 'partcount', 'date', 'last_update')"
@@ -186,14 +186,14 @@ class JCLPCBDatabase(object):
             
     def _removePartsT(self):
         """Delete the parts table."""
-        with contextlib.closing(sqlite3.connect(JCLPCBDatabase.JCLPCB_SQLITE_DB_FILE)) as con:
+        with contextlib.closing(sqlite3.connect(JLCPCBDatabase.JLCPCB_SQLITE_DB_FILE)) as con:
             with con as cur:
                 cur.execute(f"DROP TABLE IF EXISTS parts")
                 cur.commit()
                 
     def _makePartT(self, columns):
         """Create the parts table."""
-        with contextlib.closing(sqlite3.connect(JCLPCBDatabase.JCLPCB_SQLITE_DB_FILE)) as con:
+        with contextlib.closing(sqlite3.connect(JLCPCBDatabase.JLCPCB_SQLITE_DB_FILE)) as con:
             with con as cur:
                 cols = ",".join([f" '{c}'" for c in columns])
                 cur.execute(f"CREATE TABLE IF NOT EXISTS parts ({cols})")
@@ -201,7 +201,7 @@ class JCLPCBDatabase(object):
 
     def updateMetaData(self, filename, size, partcount, date, last_update):
         """Update the meta data table."""
-        with contextlib.closing(sqlite3.connect(JCLPCBDatabase.JCLPCB_SQLITE_DB_FILE)) as con:
+        with contextlib.closing(sqlite3.connect(JLCPCBDatabase.JLCPCB_SQLITE_DB_FILE)) as con:
             with con as cur:
                 cur.execute(f"DELETE from meta")
                 cur.commit()
@@ -288,17 +288,17 @@ class JCLPCBDatabase(object):
     def _selectCategory(self):
         """@brief SElect category."""
         self._info("Category List.")
-        queryStr = 'SELECT DISTINCT "{}" FROM parts ORDER BY "{}"'.format(JCLPCBDatabase.FIRST_CATEGORY, JCLPCBDatabase.FIRST_CATEGORY)
-        with contextlib.closing(sqlite3.connect(JCLPCBDatabase.JCLPCB_SQLITE_DB_FILE)) as con:
+        queryStr = 'SELECT DISTINCT "{}" FROM parts ORDER BY "{}"'.format(JLCPCBDatabase.FIRST_CATEGORY, JLCPCBDatabase.FIRST_CATEGORY)
+        with contextlib.closing(sqlite3.connect(JLCPCBDatabase.JLCPCB_SQLITE_DB_FILE)) as con:
             with con as cur:
-                print(JCLPCBDatabase.HORIZONTAL_TABLE_BORDER_CHAR*54)
-                print(JCLPCBDatabase.VERTICAL_TABLE_BORDER_CHAR + " Category                                           " + JCLPCBDatabase.VERTICAL_TABLE_BORDER_CHAR)    
-                print(JCLPCBDatabase.HORIZONTAL_TABLE_BORDER_CHAR*54)
+                print(JLCPCBDatabase.HORIZONTAL_TABLE_BORDER_CHAR*54)
+                print(JLCPCBDatabase.VERTICAL_TABLE_BORDER_CHAR + " Category                                           " + JLCPCBDatabase.VERTICAL_TABLE_BORDER_CHAR)    
+                print(JLCPCBDatabase.HORIZONTAL_TABLE_BORDER_CHAR*54)
                 results =  cur.execute(queryStr).fetchall()
                 for result in results:
-                    rowText = JCLPCBDatabase.VERTICAL_TABLE_BORDER_CHAR + " " + self._getColText(result[0], 50) + " " + JCLPCBDatabase.VERTICAL_TABLE_BORDER_CHAR
+                    rowText = JLCPCBDatabase.VERTICAL_TABLE_BORDER_CHAR + " " + self._getColText(result[0], 50) + " " + JLCPCBDatabase.VERTICAL_TABLE_BORDER_CHAR
                     print(rowText)
-                print(JCLPCBDatabase.HORIZONTAL_TABLE_BORDER_CHAR*54)
+                print(JLCPCBDatabase.HORIZONTAL_TABLE_BORDER_CHAR*54)
         
         self._dBSearch.catagory = self._uio.input("Enter the catagory text to search for: ")
                                 
@@ -310,7 +310,7 @@ class JCLPCBDatabase(object):
         self._info(titleLine)
         self._info("-"*len(titleLine))
         id = 1
-        for fName in JCLPCBDatabase.FIELD_LIST:
+        for fName in JLCPCBDatabase.FIELD_LIST:
             if fName in DBSearch.DEFAULT_COLUMN_LIST:
                 default = "Yes"
             else:
@@ -330,9 +330,9 @@ class JCLPCBDatabase(object):
                 fieldList = []
                 for elem in elems:
                     id = int(elem)
-                    if id < 0 or id > len(JCLPCBDatabase.FIELD_LIST):
+                    if id < 0 or id > len(JLCPCBDatabase.FIELD_LIST):
                         raise ValueError("")
-                    fieldList.append(JCLPCBDatabase.FIELD_LIST[id-1])
+                    fieldList.append(JLCPCBDatabase.FIELD_LIST[id-1])
                 self._dBSearch.fieldList = ",".join(fieldList)
                 break
                     
@@ -429,27 +429,27 @@ class JCLPCBDatabase(object):
         queryStr += " LIMIT {}".format(self._dBSearch.maxPartCount)
         colWidthList = self._dBSearch.columnWidthList.split(",")
         self._uio.debug("SQL query: {}".format(queryStr))
-        with contextlib.closing(sqlite3.connect(JCLPCBDatabase.JCLPCB_SQLITE_DB_FILE)) as con:
+        with contextlib.closing(sqlite3.connect(JLCPCBDatabase.JLCPCB_SQLITE_DB_FILE)) as con:
             with con as cur:
                 self._showTableHeader()
                 results =  cur.execute(queryStr).fetchall()
                 itemCount = 1
                 for result in results:
                     colIndex=0
-                    rowText = JCLPCBDatabase.VERTICAL_TABLE_BORDER_CHAR + " " + self._getColText(itemCount, 4) + " " + JCLPCBDatabase.VERTICAL_TABLE_BORDER_CHAR
+                    rowText = JLCPCBDatabase.VERTICAL_TABLE_BORDER_CHAR + " " + self._getColText(itemCount, 4) + " " + JLCPCBDatabase.VERTICAL_TABLE_BORDER_CHAR
                     ignorePart = False
                     for col in result:
                         colName = fields[colIndex]
                         colWidth = int( colWidthList[colIndex] )
                         
                         # If this is the price column and the user is only interested in parts where stock > 0
-                        if colName == JCLPCBDatabase.STOCK and self._dBSearch.stockOnly:
+                        if colName == JLCPCBDatabase.STOCK and self._dBSearch.stockOnly:
                             if col == '0':
                                 ignorePart = True
                                 break                                                           
                         
                         # If this is the price column
-                        if colName == JCLPCBDatabase.PRICE:
+                        if colName == JLCPCBDatabase.PRICE:
                             # If the user is only interested in parts that have a one off pricing
                             if self._dBSearch.oneOffPricingOnly and not col.startswith("1-"):
                                 # Ignore parts that don't have one off pricing.
@@ -460,13 +460,13 @@ class JCLPCBDatabase(object):
                         else:
                             colText = self._getColText(col, colWidth)                            
                         
-                        rowText = rowText + " " + colText + " " + JCLPCBDatabase.VERTICAL_TABLE_BORDER_CHAR
+                        rowText = rowText + " " + colText + " " + JLCPCBDatabase.VERTICAL_TABLE_BORDER_CHAR
                         colIndex += 1
                     if not ignorePart:
                         print(rowText)
                         itemCount += 1
 
-                print(JCLPCBDatabase.HORIZONTAL_TABLE_BORDER_CHAR*self._rowLength)
+                print(JLCPCBDatabase.HORIZONTAL_TABLE_BORDER_CHAR*self._rowLength)
 
     def _getPrice(self, colText, colWidth):
         """@brief Get the price string in a more readable format."""
@@ -487,17 +487,17 @@ class JCLPCBDatabase(object):
         """@brief Show the result able header."""
         fields = self._dBSearch.fieldList.split(",")
         colWidthList = self._dBSearch.columnWidthList.split(",")
-        rowText = JCLPCBDatabase.VERTICAL_TABLE_BORDER_CHAR + " Item " + JCLPCBDatabase.VERTICAL_TABLE_BORDER_CHAR
+        rowText = JLCPCBDatabase.VERTICAL_TABLE_BORDER_CHAR + " Item " + JLCPCBDatabase.VERTICAL_TABLE_BORDER_CHAR
         colIndex = 0
         for field in fields:
             colWidth = int( colWidthList[colIndex] )
             colText = self._getColText(field, colWidth)
-            rowText = rowText + " " + colText + " " + JCLPCBDatabase.VERTICAL_TABLE_BORDER_CHAR
+            rowText = rowText + " " + colText + " " + JLCPCBDatabase.VERTICAL_TABLE_BORDER_CHAR
             colIndex += 1
         self._rowLength = len(rowText)
-        print(JCLPCBDatabase.HORIZONTAL_TABLE_BORDER_CHAR*self._rowLength)
+        print(JLCPCBDatabase.HORIZONTAL_TABLE_BORDER_CHAR*self._rowLength)
         print(rowText)        
-        print(JCLPCBDatabase.HORIZONTAL_TABLE_BORDER_CHAR*self._rowLength)
+        print(JLCPCBDatabase.HORIZONTAL_TABLE_BORDER_CHAR*self._rowLength)
         
     def _getColText(self, colText, colWidth):
         _colText = str(colText)
@@ -512,33 +512,33 @@ class JCLPCBDatabase(object):
         """@brief Get the date of the CSV file.
            @return The date string when the CSV file was created."""
         dateStr = None
-        fd = open(JCLPCBDatabase.JCLPCB_CSV_DATE_FILE, 'r')
+        fd = open(JLCPCBDatabase.JLCPCB_CSV_DATE_FILE, 'r')
         lines = fd.readlines()
         fd.close()
         if len(lines) > 0:
             dateStr = lines[0].rstrip("\r\n")
         return dateStr
                 
-    def downloadJCLPCBPartsdDB(self):
-        jclpcbPartsFolder = JCLPCBDatabase.JCLPCB_PARTS_FOLDER
-        if not isdir(jclpcbPartsFolder):
-            makedirs(jclpcbPartsFolder)
-            self._info("Created {}".format(jclpcbPartsFolder))
+    def downloadJLCPCBPartsdDB(self):
+        jlcpcbPartsFolder = JLCPCBDatabase.JLCPCB_PARTS_FOLDER
+        if not isdir(jlcpcbPartsFolder):
+            makedirs(jlcpcbPartsFolder)
+            self._info("Created {}".format(jlcpcbPartsFolder))
         
-        csvFile = JCLPCBDatabase.JCLPCB_CSV_FILE
-        csvDateFile = JCLPCBDatabase.JCLPCB_CSV_DATE_FILE
+        csvFile = JLCPCBDatabase.JLCPCB_CSV_FILE
+        csvDateFile = JLCPCBDatabase.JLCPCB_CSV_DATE_FILE
             
         if isfile(csvFile):
             remove(csvFile)
             self._info("Deleted existing {} file.".format(csvFile))
 
         csvServerFileDate=None
-        with urlopen(JCLPCBDatabase.CSV_URL) as f:
+        with urlopen(JLCPCBDatabase.CSV_URL) as f:
             csvServerFileDate = dict(f.getheaders())['Date']
             
-        self._info("Downloading {}".format(JCLPCBDatabase.CSV_URL))
+        self._info("Downloading {}".format(JLCPCBDatabase.CSV_URL))
         startTime = time()    
-        wget.download(JCLPCBDatabase.CSV_URL, out=csvFile)
+        wget.download(JLCPCBDatabase.CSV_URL, out=csvFile)
         sleep(1.5)
         elapsedSeconds = time()-startTime
         self._info("Took {:.1f} seconds to download {}".format(elapsedSeconds, csvFile))
@@ -553,14 +553,14 @@ class JCLPCBDatabase(object):
 
     def createPartsDB(self):
         """@brief Create the sqllite parts database from a downloaded CSV file."""
-        csvFile = JCLPCBDatabase.JCLPCB_CSV_FILE
+        csvFile = JLCPCBDatabase.JLCPCB_CSV_FILE
         csvFileSize = path.getsize(csvFile)
         
         startTime = time()
-        if isfile(JCLPCBDatabase.JCLPCB_SQLITE_DB_FILE):
-            remove(JCLPCBDatabase.JCLPCB_SQLITE_DB_FILE)
-            self._info("Deleted existing {} file.".format(JCLPCBDatabase.JCLPCB_SQLITE_DB_FILE))
-        self._info("Creating {} file from {} file...".format(JCLPCBDatabase.JCLPCB_SQLITE_DB_FILE, csvFile))
+        if isfile(JLCPCBDatabase.JLCPCB_SQLITE_DB_FILE):
+            remove(JLCPCBDatabase.JLCPCB_SQLITE_DB_FILE)
+            self._info("Deleted existing {} file.".format(JLCPCBDatabase.JLCPCB_SQLITE_DB_FILE))
+        self._info("Creating {} file from {} file...".format(JLCPCBDatabase.JLCPCB_SQLITE_DB_FILE, csvFile))
         self._createTopLevel()
         self._removePartsT()
         
@@ -571,7 +571,7 @@ class JCLPCBDatabase(object):
             
             buffer = []
             part_count = 0
-            with contextlib.closing(sqlite3.connect(JCLPCBDatabase.JCLPCB_SQLITE_DB_FILE)) as con:
+            with contextlib.closing(sqlite3.connect(JLCPCBDatabase.JLCPCB_SQLITE_DB_FILE)) as con:
                 cols = ",".join(["?"] * len(headers))
                 query = f"INSERT INTO parts VALUES ({cols})"
     
@@ -585,23 +585,23 @@ class JCLPCBDatabase(object):
                 if buffer:
                     con.executemany(query, buffer)
                 con.commit()
-            self.updateMetaData(JCLPCBDatabase.JCLPCB_CSV_FILENAME, csvFileSize, part_count, self._getCSVCreationDate(), datetime.now().isoformat())
+            self.updateMetaData(JLCPCBDatabase.JLCPCB_CSV_FILENAME, csvFileSize, part_count, self._getCSVCreationDate(), datetime.now().isoformat())
         
         elapsedSeconds = time()-startTime
-        self._info("Took {:.1f} seconds to create {}".format(elapsedSeconds, JCLPCBDatabase.JCLPCB_SQLITE_DB_FILE))
+        self._info("Took {:.1f} seconds to create {}".format(elapsedSeconds, JLCPCBDatabase.JLCPCB_SQLITE_DB_FILE))
 
 class DBSearch(object):
     """@brief Holds the parameters to search through the parts database."""
     
-    DEFAULT_COLUMN_LIST = (JCLPCBDatabase.LCSC_PART,
-                           JCLPCBDatabase.STOCK,
-                           JCLPCBDatabase.MFG_PART,
-                           JCLPCBDatabase.PACKAGE,
-                           JCLPCBDatabase.LIBRARY_TYPE,
-                           JCLPCBDatabase.PRICE,
-                           JCLPCBDatabase.DESCRIPTION)
+    DEFAULT_COLUMN_LIST = (JLCPCBDatabase.LCSC_PART,
+                           JLCPCBDatabase.STOCK,
+                           JLCPCBDatabase.MFG_PART,
+                           JLCPCBDatabase.PACKAGE,
+                           JLCPCBDatabase.LIBRARY_TYPE,
+                           JLCPCBDatabase.PRICE,
+                           JLCPCBDatabase.DESCRIPTION)
     DEFAULT_COLUMN_SIZES = (4,7,25,25,8,12,90)
-    JCLPCB_KICAD_URL = "https://support.jlcpcb.com/article/84-how-to-generate-the-bom-and-centroid-file-from-kicad"
+    JLCPCB_KICAD_URL = "https://support.jlcpcb.com/article/84-how-to-generate-the-bom-and-centroid-file-from-kicad"
 
     @staticmethod
     def GetBoolString(boolValue):
@@ -649,13 +649,13 @@ class PCBFileProcessor(object):
 
     VENDOR_SEEDSTUDIO = "seedstudio"
     VENDOR_PCBWAY = "pcbway"
-    VENDOR_JCLPCB = "jclpcb"
+    VENDOR_JLCPCB = "jlcpcb"
     SEED_STUDIO_REQUIRED_FILES = ["F.SilkS.gto", "F.Cu.gtl", "F.Paste.gtp", "F.Mask.gts", "B.Paste.gbp", "B.Cu.gbl", "B.SilkS.gbo", "B.Mask.gbs", "Dwgs.User.gbr", "Edge.Cuts.gm1", ".drl"]
     PCBWAY_REQUIRED_FILES = ["F.Cu.gbr", "F.SilkS.gbr", "F.Mask.gbr", "B.Cu.gbr", "B.SilkS.gbr", "Edge.Cuts.gbr", "B.Mask.gbr", ".drl"]
-    JCLPCB_REQUIRED_FILES = ["F_Cu.gbr", "F_SilkS.gbr", "F_Mask.gbr", "B_Cu.gbr", "B_SilkS.gbr", "Edge_Cuts.gbr", "B_Mask.gbr", ".drl"]
-    JCLPCB_REQUIRED_FILES_V6 = ["F_Cu.gtl", "B_Cu.gbl", "F_Paste.gtp", "B_Paste.gbp", "F_Silkscreen.gto", "B_Silkscreen.gbo", "F_Mask.gts", "B_Mask.gbs", "Edge_Cuts.gm1", ".drl"]
+    JLCPCB_REQUIRED_FILES = ["F_Cu.gbr", "F_SilkS.gbr", "F_Mask.gbr", "B_Cu.gbr", "B_SilkS.gbr", "Edge_Cuts.gbr", "B_Mask.gbr", ".drl"]
+    JLCPCB_REQUIRED_FILES_V6 = ["F_Cu.gtl", "B_Cu.gbl", "F_Paste.gtp", "B_Paste.gbp", "F_Silkscreen.gto", "B_Silkscreen.gbo", "F_Mask.gts", "B_Mask.gbs", "Edge_Cuts.gm1", ".drl"]
 
-    JCLPCB_KICAD_HELP_PAGE = "https://support.jlcpcb.com/article/84-how-to-generate-the-bom-and-centroid-file-from-kicad"
+    JLCPCB_KICAD_HELP_PAGE = "https://support.jlcpcb.com/article/84-how-to-generate-the-bom-and-centroid-file-from-kicad"
     CSV_URL = "https://jlcpcb.com/componentSearch/uploadComponentInfo"
     
     TOP = "top"
@@ -663,11 +663,11 @@ class PCBFileProcessor(object):
     
     ASSY_SEARCH_PATHS = [".",".."]
     
-    JCLPCB_CSV_FILENAME = "parts.csv"
-    JCLPCB_PARTS_FOLDER = join(GetHomePath(), ".jclpcb")
-    JCLPCB_CSV_DATE_FILE = join(JCLPCB_PARTS_FOLDER, JCLPCB_CSV_FILENAME + ".date")
-    JCLPCB_CSV_FILE = join(JCLPCB_PARTS_FOLDER, JCLPCB_CSV_FILENAME)
-    JCLPCB_SQLITE_DB_FILE = path.join(JCLPCB_PARTS_FOLDER, "parts.db")
+    JLCPCB_CSV_FILENAME = "parts.csv"
+    JLCPCB_PARTS_FOLDER = join(GetHomePath(), ".jlcpcb")
+    JLCPCB_CSV_DATE_FILE = join(JLCPCB_PARTS_FOLDER, JLCPCB_CSV_FILENAME + ".date")
+    JLCPCB_CSV_FILE = join(JLCPCB_PARTS_FOLDER, JLCPCB_CSV_FILENAME)
+    JLCPCB_SQLITE_DB_FILE = path.join(JLCPCB_PARTS_FOLDER, "parts.db")
         
     def __init__(self, uio, options):
         """@brief Contructor
@@ -680,7 +680,7 @@ class PCBFileProcessor(object):
         self._mfg            = None
         self._projectVersion = None
         self._overWrite      = False
-        self._jclPCBDatabase = JCLPCBDatabase(self._uio)
+        self._jlcPCBDatabase = JLCPCBDatabase(self._uio)
     
     def _info(self, msg):
         """@brief Display an info level message.
@@ -708,12 +708,12 @@ class PCBFileProcessor(object):
                 mfgFileList = PCBFileProcessor.SEED_STUDIO_REQUIRED_FILES
                 break
     
-            if pcbFile.endswith(PCBFileProcessor.JCLPCB_REQUIRED_FILES[0]):
-                mfgFileList = PCBFileProcessor.JCLPCB_REQUIRED_FILES
+            if pcbFile.endswith(PCBFileProcessor.JLCPCB_REQUIRED_FILES[0]):
+                mfgFileList = PCBFileProcessor.JLCPCB_REQUIRED_FILES
                 break
     
-            if pcbFile.endswith(PCBFileProcessor.JCLPCB_REQUIRED_FILES_V6[0]):
-                mfgFileList = PCBFileProcessor.JCLPCB_REQUIRED_FILES_V6
+            if pcbFile.endswith(PCBFileProcessor.JLCPCB_REQUIRED_FILES_V6[0]):
+                mfgFileList = PCBFileProcessor.JLCPCB_REQUIRED_FILES_V6
                 break
     
         sortedFileList = []
@@ -770,8 +770,8 @@ class PCBFileProcessor(object):
         self._info("Supported manufacturers")
         self._info("SeedStudio:        1")
         self._info("PCBWay:            2")
-        self._info("JCLPCB (Kicad V5): 3")
-        self._info("JCLPCB (Kicad V6): 4")
+        self._info("JLCPCB (Kicad V5): 3")
+        self._info("JLCPCB (Kicad V6): 4")
         mfg = self._uio.input("Manufacturer: ")
         if mfg not in ["1", "2", "3", "4"]:
             raise MakeError("Current supported manufacturers are 1, 2, 3 or 4.")
@@ -782,11 +782,11 @@ class PCBFileProcessor(object):
             requiredFiles = list(PCBFileProcessor.PCBWAY_REQUIRED_FILES)
             mfg= PCBFileProcessor.VENDOR_PCBWAY
         elif mfg == '3': 
-            requiredFiles = list(PCBFileProcessor.JCLPCB_REQUIRED_FILES)
-            mfg= PCBFileProcessor.VENDOR_JCLPCB
+            requiredFiles = list(PCBFileProcessor.JLCPCB_REQUIRED_FILES)
+            mfg= PCBFileProcessor.VENDOR_JLCPCB
         elif mfg == '4': 
-            requiredFiles = list(PCBFileProcessor.JCLPCB_REQUIRED_FILES_V6)
-            mfg=mfg= PCBFileProcessor.VENDOR_JCLPCB
+            requiredFiles = list(PCBFileProcessor.JLCPCB_REQUIRED_FILES_V6)
+            mfg=mfg= PCBFileProcessor.VENDOR_JLCPCB
         else:
             raise Exception("Invalid MFG ID")
         
@@ -862,8 +862,8 @@ class PCBFileProcessor(object):
     def showKicadSettings(self):
         """@brief show the kicad settings required to generate files for the MFG"""
     
-        plotImage = join(dirname(__file__), "jclpcb_kicad_v6_plot.png")
-        drillImage = join(dirname(__file__), "jclpcb_kicad_v6_drill.png")
+        plotImage = join(dirname(__file__), "jlcpcb_kicad_v6_plot.png")
+        drillImage = join(dirname(__file__), "jlcpcb_kicad_v6_drill.png")
         
         if not isfile(plotImage):
             raise Exception("{} file not found.".format(plotImage))
@@ -877,7 +877,7 @@ class PCBFileProcessor(object):
         im = Image.open(drillImage)
         im.show()
 
-        webbrowser.open(DBSearch.JCLPCB_KICAD_URL, new=2)
+        webbrowser.open(DBSearch.JLCPCB_KICAD_URL, new=2)
 
     def _getAssySide(self):
         """@brief Get the selected for assembly. 
@@ -952,7 +952,7 @@ class PCBFileProcessor(object):
         return matchedExistingBOMLine
 
     def _mergeBOMFiles(self, kicadBOMFile, bomOutputFile):
-        """@brief Merge the BOM files. This will copy the JCLPCB part number for all matching parts.
+        """@brief Merge the BOM files. This will copy the JLCPCB part number for all matching parts.
                   Matching parts must have the same Designator and Footprint."""
         kicadBOMFileLines = self._getLines(kicadBOMFile)
         self._info("Loaded {} lines from {}".format(len(kicadBOMFileLines), kicadBOMFile))   
@@ -1004,8 +1004,8 @@ class PCBFileProcessor(object):
         
         return bomOutputFile
 
-    def _updateJCLPCBPart(self, line):
-        """@brief Allow the user to enter the JCLPCB part number.
+    def _updateJLCPCBPart(self, line):
+        """@brief Allow the user to enter the JLCPCB part number.
            @return The JLCPCB part number of n = next part or p = previous part."""
         elems = line.split('"')
         fieldList = []
@@ -1013,7 +1013,7 @@ class PCBFileProcessor(object):
             if len(elem) > 0 and elem != ',':
                 fieldList.append(elem)
 
-        # If JCLPCB part number is missing
+        # If JLCPCB part number is missing
         if len(fieldList) == 3:
             # Add empty element
             fieldList.append("")
@@ -1023,12 +1023,12 @@ class PCBFileProcessor(object):
                 comment = fieldList[0].strip('"')
                 designator = fieldList[1].strip('"')
                 footPrint = fieldList[2].strip('"')
-                jclPcbPartNumber = fieldList[3].strip('"')
+                jlcPcbPartNumber = fieldList[3].strip('"')
                 self._info("---------------------------------------------------------------------------")
                 self._info("COMMENT:                 {}".format(comment))
                 self._info("DESIGNATOR:              {}".format(designator))
                 self._info("FOOTPRINT:               {}".format(footPrint))
-                self._info("JCLPCB PART NUMBER:      {}".format(jclPcbPartNumber))
+                self._info("JLCPCB PART NUMBER:      {}".format(jlcPcbPartNumber))
                 self._info("")
                 self._info("Enter")
                 self._info("- The JLCPCB part number")
@@ -1037,14 +1037,14 @@ class PCBFileProcessor(object):
                 self._info("- N to move to the next part")
                 self._info("- B to move back to the previous part")
                 self._info("- A Abort BOM file edit.")
-                jclPcbPartNumber = self._uio.input("")
-                jclPcbPartNumber=jclPcbPartNumber.strip('\r\n"')
+                jlcPcbPartNumber = self._uio.input("")
+                jlcPcbPartNumber=jlcPcbPartNumber.strip('\r\n"')
                 # If user wants to move to next or previous parts
-                if jclPcbPartNumber in ['n', 'b', 'l', 'f', 'a']:
-                    return jclPcbPartNumber
+                if jlcPcbPartNumber in ['n', 'b', 'l', 'f', 'a']:
+                    return jlcPcbPartNumber
 
-                self._info("Set JLCPCB part number to {}".format(jclPcbPartNumber))
-                return '"{}","{}","{}","{}"'.format(comment, designator, footPrint, jclPcbPartNumber)
+                self._info("Set JLCPCB part number to {}".format(jlcPcbPartNumber))
+                return '"{}","{}","{}","{}"'.format(comment, designator, footPrint, jlcPcbPartNumber)
 
         else:
             self._error("Invalid BOM line: {}".format(line))
@@ -1071,7 +1071,7 @@ class PCBFileProcessor(object):
                 self._info("---------------------------------------------------------------------------")
                 # ! first line is the header line
                 self._info("Editing part {} of {} parts from {}".format(lineIndex, len(bomLines)-1, bomFile))   
-                newLine = self._updateJCLPCBPart(line)
+                newLine = self._updateJLCPCBPart(line)
                 if newLine == 'f':
                     lineIndex = 0
                     continue
@@ -1138,7 +1138,7 @@ class PCBFileProcessor(object):
 
     def updateAssyFiles(self):
         """@brief search for an update the assembly files."""
-        if self._mfg != PCBFileProcessor.VENDOR_JCLPCB:
+        if self._mfg != PCBFileProcessor.VENDOR_JLCPCB:
             raise Exception("Currently assembly files are only generated for JCBPCB")
         
         self._processPlcaementFile()
@@ -1146,12 +1146,12 @@ class PCBFileProcessor(object):
        
     def searchParts(self):
         """@brief Search parts database."""
-        self._jclPCBDatabase.search()
+        self._jlcPCBDatabase.search()
         
-    def downloadJCLPCBDatabase(self):
-        """@brief Download the latest JCL PCB parts database."""
-        self._jclPCBDatabase.downloadJCLPCBPartsdDB()
-        self._jclPCBDatabase.createPartsDB()
+    def downloadJLCPCBDatabase(self):
+        """@brief Download the latest JLC PCB parts database."""
+        self._jlcPCBDatabase.downloadJLCPCBPartsdDB()
+        self._jlcPCBDatabase.createPartsDB()
 
 if __name__ == "__main__":
     uio = UIO()
@@ -1159,13 +1159,13 @@ if __name__ == "__main__":
     try:
         parser = argparse.ArgumentParser(description="Helper program for building PCB gerber zip files prior to MFG.", formatter_class=argparse.RawDescriptionHelpFormatter)
         parser.add_argument("-d", "--debug",        help="Enable debugging.",     action='store_true')
-        parser.add_argument("-n", "--no_preview",   help="Do not preview files.", action='store_true')
-        parser.add_argument("-s",                   help="Show the Kicad settings required to generate gerbers for JCLPCB.", action="store_true")
-        parser.add_argument("-v", "--view_zip",     help="View zip file.", action="store_true")
-        parser.add_argument("--gerbview",           help="Use gerbview (Included with KiCad) not the default gerbv program to view gerbers.", action="store_true")
-        parser.add_argument("-a", "--assy",         help="Process the BOM and component placement files for PCB assembly.", action="store_true")
-        parser.add_argument("-f", "--find",         help="Find JCLPCB parts.", action='store_true')
-        parser.add_argument("-u", "--update",       help="Update the local copy of the JCL PCB parts database.", action='store_true')
+        parser.add_argument("-a", "--assy",         help="In adition to the gerber files process the BOM and component placement files for PCB assembly.", action="store_true")
+        parser.add_argument("-f", "--find",         help="Find parts in the local copy of the JLCPCB parts database.", action='store_true')
+        parser.add_argument("-u", "--update",       help="Update the local copy of the JLCPCB parts database.", action='store_true')
+        parser.add_argument("-n", "--no_preview",   help="Do not preview files. The default is to preview the gerber files using either gerbv or the gerbview programs.", action='store_true')
+        parser.add_argument("-s",                   help="Show the Kicad settings required to generate gerbers for JLCPCB. Also the Kicad/JCLPCB helper link is opened using the default web browser.", action="store_true")
+        parser.add_argument("-v", "--view_zip",     help="View zip file. This option can be used if the user only wants to view the contents of an existing zip files containing PCB gerber files.", action="store_true")
+        parser.add_argument("--gerbview",           help="Use gerbview (Included with KiCad) not the default gerbv program which must be installed separately ('sudo apt install gerbv') to view gerbers.", action="store_true")
 
         options = parser.parse_args()
         
@@ -1186,7 +1186,7 @@ if __name__ == "__main__":
             pcbFileProcessor.searchParts()
             
         elif options.update:
-            pcbFileProcessor.downloadJCLPCBDatabase()
+            pcbFileProcessor.downloadJLCPCBDatabase()
             
         else:
             zipFile = pcbFileProcessor.zipFiles()
