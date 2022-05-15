@@ -9,6 +9,7 @@ import wget
 import csv
 import contextlib
 import sqlite3
+import webbrowser
 
 from   time import sleep, time
 from   os import listdir, getcwd, system, path, makedirs, remove, environ
@@ -600,6 +601,7 @@ class DBSearch(object):
                            JCLPCBDatabase.PRICE,
                            JCLPCBDatabase.DESCRIPTION)
     DEFAULT_COLUMN_SIZES = (4,7,25,25,8,12,90)
+    JCLPCB_KICAD_URL = "https://support.jlcpcb.com/article/84-how-to-generate-the-bom-and-centroid-file-from-kicad"
 
     @staticmethod
     def GetBoolString(boolValue):
@@ -874,6 +876,8 @@ class PCBFileProcessor(object):
     
         im = Image.open(drillImage)
         im.show()
+
+        webbrowser.open(DBSearch.JCLPCB_KICAD_URL, new=2)
 
     def _getAssySide(self):
         """@brief Get the selected for assembly. 
