@@ -6,10 +6,37 @@ using KiCad.
 
 # Installation
 
-To install the pcbzip command line tool run
+- Clone the git repo.
 
 ```
-./install
+git clone git@github.com:pjaos/pcbzip.git
+```
+
+- cd into the folder containg the repo contents.
+
+```
+cd pcbzip
+```
+
+- Install the pcbzip command line tool on your local machine by running the following command.
+
+```
+sudo ./install.sh
+Processing /tmp/pcbzip
+  Preparing metadata (setup.py) ... done
+Requirement already satisfied: pillow>=9.0.0 in /usr/local/lib/python3.8/dist-packages (from pcbzip==1.5) (9.0.1)
+Building wheels for collected packages: pcbzip
+  Building wheel for pcbzip (setup.py) ... done
+  Created wheel for pcbzip: filename=pcbzip-1.5-py3-none-any.whl size=13808 sha256=5f9646e0abaca97b1fef54d3ab35b5fd45396fe8cdd5e2a00caeeac498d2b8a6
+  Stored in directory: /tmp/pip-ephem-wheel-cache-9eyalw2n/wheels/82/a8/08/8562420c5236c6f7ce7a4ccefb4025f6a8aa2b8878706b0903
+Successfully built pcbzip
+Installing collected packages: pcbzip
+  Attempting uninstall: pcbzip
+    Found existing installation: pcbzip 1.5
+    Uninstalling pcbzip-1.5:
+      Successfully uninstalled pcbzip-1.5
+Successfully installed pcbzip-1.5
+WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv
 ```
 
 This should be installed onto a Linux machine that has KiCad installed.
