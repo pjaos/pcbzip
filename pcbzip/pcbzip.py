@@ -864,6 +864,7 @@ class PCBFileProcessor(object):
     
         plotImage = join(dirname(__file__), "jlcpcb_kicad_v6_plot.png")
         drillImage = join(dirname(__file__), "jlcpcb_kicad_v6_drill.png")
+        placementImage = join(dirname(__file__), "jclpcb_kicad_v6_placement.png")
         
         if not isfile(plotImage):
             raise Exception("{} file not found.".format(plotImage))
@@ -871,10 +872,16 @@ class PCBFileProcessor(object):
         if not isfile(drillImage):
             raise Exception("{} file not found.".format(drillImage))
         
+        if not isfile(placementImage):
+            raise Exception("{} file not found.".format(placementImage))
+        
         im = Image.open(plotImage)
         im.show()
     
         im = Image.open(drillImage)
+        im.show()
+
+        im = Image.open(placementImage)
         im.show()
 
         webbrowser.open(DBSearch.JLCPCB_KICAD_URL, new=2)
