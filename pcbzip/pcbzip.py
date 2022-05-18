@@ -195,8 +195,16 @@ class JLCPCBDatabase(object):
         """Create the parts table."""
         with contextlib.closing(sqlite3.connect(JLCPCBDatabase.JLCPCB_SQLITE_DB_FILE)) as con:
             with con as cur:
-                cols = ",".join([f" '{c}'" for c in columns])
-                cur.execute(f"CREATE TABLE IF NOT EXISTS parts ({cols})")
+                colList = []
+                for col in columns:
+                    if col == "Stock" or col == "Solder Joint":
+                        colList.append("'{}' int".format(col))
+                    else:
+                        colList.append("'{}'".format(col))
+
+                cols = ",".join(colList)
+                sqlCmd = f"CREATE TABLE IF NOT EXISTS parts ({cols})"
+                cur.execute(sqlCmd)
                 cur.commit()
 
     def updateMetaData(self, filename, size, partcount, date, last_update):
@@ -627,7 +635,7 @@ class DBSearch(object):
         self.type               = ""
         self.stockOnly          = True
         self.oneOffPricingOnly  = False
-        self.orderFieldID       = 1
+        self.orderFieldID       = 2
         self.fieldList          = ",".join(DBSearch.DEFAULT_COLUMN_LIST)
         self.columnWidthList    = ",".join(map(str, DBSearch.DEFAULT_COLUMN_SIZES))
         self.maxPartCount       = 1000   
@@ -1162,7 +1170,7 @@ class PCBFileProcessor(object):
         
     def downloadJLCPCBDatabase(self):
         """@brief Download the latest JLC PCB parts database."""
-        self._jlcPCBDatabase.downloadJLCPCBPartsdDB()
+        #self._jlcPCBDatabase.downloadJLCPCBPartsdDB()
         self._jlcPCBDatabase.createPartsDB()
 
 if __name__ == "__main__":
