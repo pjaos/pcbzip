@@ -257,6 +257,8 @@ class JLCPCBDatabase(object):
                 self._selectCategory()
                 
             elif response.lower() == 'm':
+                self._info("You may enter a comma separated list of the text matches required in the MFG part number field.")
+                self._info("")
                 self._dBSearch.mfgPartNumber = self._uio.input("Enter the MFG part number: ")
 
             elif response.lower() == 'd':
@@ -415,7 +417,10 @@ class JLCPCBDatabase(object):
             searchValid = True
 
         if len(self._dBSearch.mfgPartNumber) > 0:
-            qList.append('"MFR.Part" LIKE "%{}%"'.format(self._dBSearch.mfgPartNumber))
+            elems = self._dBSearch.mfgPartNumber.split(",")
+            if len(elems) > 0:
+                for sText in elems:
+                    qList.append('"MFR.Part" LIKE "%{}%"'.format(sText))
             searchValid = True
 
         if len(self._dBSearch.description) > 0:
