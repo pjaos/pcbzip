@@ -227,6 +227,7 @@ class JLCPCBDatabase(object):
         self._info("M -  Enter the MFG part number.")
         self._info("D -  Enter a part description.")
         self._info("P -  Enter a part package.")
+        self._info("J -  JLCPCB part number.")
         self._info("T -  Enter a part type (Basic or Extended).")
         self._info("N -  Enter the maximum number of parts to display.")
         self._info("R -  Reset/Clear search parameters.")
@@ -269,6 +270,9 @@ class JLCPCBDatabase(object):
 
             elif response.lower() == 'p':
                 self._dBSearch.package = self._uio.input("Enter the package text to search for: ")
+                
+            elif response.lower() == 'j':
+                self._dBSearch.jclPcbPartNumber = self._uio.input("Enter the JLCPCB part number to search for: ")
                 
             elif response.lower() == 'n':
                 self._dBSearch.maxPartCount = self._uio.inputDecInt("Enter the max number of searched parts to display: ", 1, 1000000)
@@ -439,6 +443,13 @@ class JLCPCBDatabase(object):
 
         if len(self._dBSearch.package) > 0:
             qList.append('"Package" LIKE "%{}%"'.format(self._dBSearch.package))
+            searchValid = True
+
+        if len(self._dBSearch.jclPcbPartNumber) > 0:
+            elems = self._dBSearch.jclPcbPartNumber.split(",")
+            if len(elems) > 0:
+                for sText in elems:
+                    qList.append('"LCSC Part" LIKE "%{}%"'.format(sText))
             searchValid = True
 
         if len(self._dBSearch.type) > 0:
@@ -659,7 +670,7 @@ class DBSearch(object):
                            JLCPCBDatabase.LIBRARY_TYPE,
                            JLCPCBDatabase.PRICE,
                            JLCPCBDatabase.DESCRIPTION)
-    DEFAULT_COLUMN_SIZES = (4,7,25,25,8,12,90)
+    DEFAULT_COLUMN_SIZES = (9,7,25,25,8,12,90)
     JLCPCB_KICAD_URL = "https://support.jlcpcb.com/article/84-how-to-generate-the-bom-and-centroid-file-from-kicad"
 
     @staticmethod
@@ -678,6 +689,7 @@ class DBSearch(object):
         self.mfgPartNumber      = ""
         self.description        = ""
         self.package            = ""
+        self.jclPcbPartNumber   = ""
         self.type               = ""
         self.stockOnly          = True
         self.oneOffPricingOnly  = False
@@ -694,6 +706,7 @@ class DBSearch(object):
         lines.append("MFG Part Number:             {}".format(self.mfgPartNumber))
         lines.append("Description:                 {}".format(self.description))
         lines.append("Package:                     {}".format(self.package))
+        lines.append("JLCPCB Part Number:          {}".format(self.jclPcbPartNumber))
         lines.append("Type:                        {}".format(self.type))
         lines.append("Show Only Stock > 0:         {}".format( DBSearch.GetBoolString( self.stockOnly )))
         lines.append("Show Only One Off Pricing:   {}".format( DBSearch.GetBoolString( self.oneOffPricingOnly) ))
