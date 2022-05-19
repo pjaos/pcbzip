@@ -242,7 +242,8 @@ class JLCPCBDatabase(object):
         """@brief Show the parts DB search parameters."""
         lines = self._dBSearch.getLines()
         self._info("")
-        self._info("Current Search Parameters")
+        self._info("SELECTED SEARCH PARAMETERS")
+        self._info("")
         for line in lines:
             self._info(line)
         
@@ -294,8 +295,7 @@ class JLCPCBDatabase(object):
                 self._dBSearch.init()
                 
             elif response.lower() == 's':
-                self._search()
-                self._uio.input("Press enter to return to parts selection: ")
+                self._searchD()
         
     def _selectCategory(self):
         """@brief SElect category."""
@@ -403,10 +403,17 @@ class JLCPCBDatabase(object):
             else:
                 self._dBSearch.orderFieldID = orderFieldID
                 break
-        
-    def _search(self):
-        """@brief Perform the database search and display the results."""
+    
+    def _getSQLSearchCmd(self, addDataSheet=False):
+        """@brief Get the SQL command to search the data base.
+           @param addDataSheet If True then add the data sheet column to the results.
+           @return A tuple
+                   0: The SQL query string.
+                   1: A list of search fields."""
         fields = self._dBSearch.fieldList.split(",")
+        if addDataSheet:
+            if "Datasheet" not in fields:
+                fields.append("Datasheet")
         dispColStr = ",".join(f'"{c}"' for c in fields)
         queryStr = 'SELECT {} FROM parts WHERE '.format(dispColStr)
         qList = []
@@ -445,6 +452,12 @@ class JLCPCBDatabase(object):
         queryStr += " AND ".join(qList)
         queryStr += ' ORDER BY "{}"'.format(fields[self._dBSearch.orderFieldID-1])
         queryStr += " LIMIT {}".format(self._dBSearch.maxPartCount)
+        return (queryStr, fields)
+    
+    def _search(self):
+        """@brief Perform the database search and display the results.
+           @return The db search results."""
+        queryStr, fields = self._getSQLSearchCmd()
         colWidthList = self._dBSearch.columnWidthList.split(",")
         self._uio.debug("SQL query: {}".format(queryStr))
         with contextlib.closing(sqlite3.connect(JLCPCBDatabase.JLCPCB_SQLITE_DB_FILE)) as con:
@@ -485,7 +498,35 @@ class JLCPCBDatabase(object):
                         itemCount += 1
 
                 print(JLCPCBDatabase.HORIZONTAL_TABLE_BORDER_CHAR*self._rowLength)
+                
+        return results
 
+    def _searchD(self):
+        """@brief Search for parts and allow the user to view data sheets."""
+        while True:
+            searchResults = self._search()
+            self._info("- Enter the item number to view the datasheet on a part.")
+            self._info("- Press enter to return to parts selection.")
+            response = self._uio.input("")
+            try:
+                itemNumber = int(response)
+                self._showDataSheet(itemNumber)
+            except ValueError:
+                break
+            
+    def _showDataSheet(self, itemNumber):
+        """@brief Show the datasheet for the item.
+           @param itemNumber The number of the data sheet in the search results."""
+        queryStr, fields = self._getSQLSearchCmd(addDataSheet=True)
+        self._uio.debug("SQL query: {}".format(queryStr))
+        with contextlib.closing(sqlite3.connect(JLCPCBDatabase.JLCPCB_SQLITE_DB_FILE)) as con:
+            with con as cur:
+                self._showTableHeader()
+                results =  cur.execute(queryStr).fetchall()
+                dataSheetURL = str(results[itemNumber-1][-1])
+                self._info("Opening {}".format(dataSheetURL))
+                webbrowser.open(dataSheetURL, new=2)
+                           
     def _getPrice(self, colText, colWidth):
         """@brief Get the price string in a more readable format."""
         priceList=[]
