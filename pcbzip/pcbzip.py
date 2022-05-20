@@ -298,12 +298,12 @@ class JLCPCBDatabase(object):
             elif response.lower() == 'ma':
                 self._dBSearch.maxPartCount = self._uio.inputDecInt("Enter the max number of searched parts to display: ", 1, 1000000)
 
-            self._dBSearch.save()
-            
-            if response.lower() == 'r':
+            elif response.lower() == 'r':
                 self._dBSearch.init()
                 
-            elif response.lower() == 's':
+            self._dBSearch.save()
+                
+            if response.lower() == 's':
                 self._searchD()
                  
     def _selectCategory(self):
