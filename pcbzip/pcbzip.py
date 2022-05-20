@@ -683,7 +683,7 @@ class DBSearch(object):
     MFG_PART_NUMBER_ATTR        = "MFG_PART_NUMBER_ATTR"
     DESCRIPTION_ATTR            = "DESCRIPTION_ATTR"
     PACKAGE_ATTR                = "PACKAGE_ATTR"
-    JCLPCB_PART_NUMBER_ATTR     = "JCLPCB_PART_NUMBER"
+    JLCPCB_PART_NUMBER_ATTR     = "JLCPCB_PART_NUMBER_ATTR"
     TYPE_ATTR                   = "TYPE_ATTR"
     STOCK_ONLY_ATTR             = "STOCK_ONLY_ATTR"
     ONE_OFF_PRICING_ONLY_ATTR   = "ONE_OFF_PRICING_ONLY_ATTR"
@@ -740,7 +740,7 @@ class DBSearch(object):
                     DBSearch.MFG_PART_NUMBER_ATTR:      self.mfgPartNumber,
                     DBSearch.DESCRIPTION_ATTR:          self.description,
                     DBSearch.PACKAGE_ATTR:              self.package,
-                    DBSearch.JCLPCB_PART_NUMBER_ATTR:   self.jclPcbPartNumber,
+                    DBSearch.JLCPCB_PART_NUMBER_ATTR:   self.jclPcbPartNumber,
                     DBSearch.TYPE_ATTR:                 self.type,
                     DBSearch.STOCK_ONLY_ATTR:           self.stockOnly,
                     DBSearch.ONE_OFF_PRICING_ONLY_ATTR: self.oneOffPricingOnly,
@@ -762,7 +762,7 @@ class DBSearch(object):
             self.mfgPartNumber = loadDict[DBSearch.MFG_PART_NUMBER_ATTR]
             self.description = loadDict[DBSearch.DESCRIPTION_ATTR]
             self.package = loadDict[DBSearch.PACKAGE_ATTR]
-            self.jclPcbPartNumber = loadDict[DBSearch.JCLPCB_PART_NUMBER_ATTR]
+            self.jclPcbPartNumber = loadDict[DBSearch.JLCPCB_PART_NUMBER_ATTR]
             self.type = loadDict[DBSearch.TYPE_ATTR]
             self.stockOnly = loadDict[DBSearch.STOCK_ONLY_ATTR]
             self.oneOffPricingOnly = loadDict[DBSearch.ONE_OFF_PRICING_ONLY_ATTR]
@@ -1319,7 +1319,7 @@ if __name__ == "__main__":
         parser.add_argument("-f", "--find",         help="Find parts in the local copy of the JLCPCB parts database.", action='store_true')
         parser.add_argument("-u", "--update",       help="Update the local copy of the JLCPCB parts database.", action='store_true')
         parser.add_argument("-n", "--no_preview",   help="Do not preview files. The default is to preview the gerber files using either gerbv or the gerbview programs.", action='store_true')
-        parser.add_argument("-s",                   help="Show the Kicad settings required to generate gerbers for JLCPCB. Also the Kicad/JCLPCB helper link is opened using the default web browser.", action="store_true")
+        parser.add_argument("-s",                   help="Show the Kicad settings required to generate gerbers for JLCPCB. Also the Kicad/JLCPCB helper link is opened using the default web browser.", action="store_true")
         parser.add_argument("-v", "--view_zip",     help="View zip file. This option can be used if the user only wants to view the contents of an existing zip files containing PCB gerber files.", action="store_true")
         parser.add_argument("--gerbview",           help="Use gerbview (Included with KiCad) not the default gerbv program which must be installed separately ('sudo apt install gerbv') to view gerbers.", action="store_true")
 
