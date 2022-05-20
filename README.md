@@ -278,15 +278,16 @@ INFO:  C -  Enter a part category.
 INFO:  M -  Enter the MFG part number.
 INFO:  D -  Enter a part description.
 INFO:  P -  Enter a part package.
+INFO:  J -  JLCPCB part number.
 INFO:  T -  Enter a part type (Basic or Extended).
-INFO:  N -  Enter the maximum number of parts to display.
 INFO:  R -  Reset/Clear search parameters.
 INFO:  S -  Search parts database using the selected parameters.
 INFO:  SP - Toggle Show only parts where stock > 0.
 INFO:  OP - Toggle One Off Only Pricing.
 INFO:  FL - Enter a list of fields/columns to display.
+INFO:  OF - Enter the field/column to order to display.
 INFO:  CS - Enter a list of field/column sizes.
-INFO:  OF - Enter the field/column to order the output on.
+INFO:  MA - Enter the maximum number of parts to display.
 INFO:  
 INPUT: Option: 
 ```
@@ -302,15 +303,16 @@ INFO:  C -  Enter a part category.
 INFO:  M -  Enter the MFG part number.
 INFO:  D -  Enter a part description.
 INFO:  P -  Enter a part package.
+INFO:  J -  JLCPCB part number.
 INFO:  T -  Enter a part type (Basic or Extended).
-INFO:  N -  Enter the maximum number of parts to display.
 INFO:  R -  Reset/Clear search parameters.
 INFO:  S -  Search parts database using the selected parameters.
 INFO:  SP - Toggle Show only parts where stock > 0.
 INFO:  OP - Toggle One Off Only Pricing.
 INFO:  FL - Enter a list of fields/columns to display.
+INFO:  OF - Enter the field/column to order to display.
 INFO:  CS - Enter a list of field/column sizes.
-INFO:  OF - Enter the field/column to order the output on.
+INFO:  MA - Enter the maximum number of parts to display.
 INFO:  
 INPUT: Option: M
 INPUT: Enter the MFG part number: ADS1115
@@ -333,15 +335,16 @@ INFO:  C -  Enter a part category.
 INFO:  M -  Enter the MFG part number.
 INFO:  D -  Enter a part description.
 INFO:  P -  Enter a part package.
+INFO:  J -  JLCPCB part number.
 INFO:  T -  Enter a part type (Basic or Extended).
-INFO:  N -  Enter the maximum number of parts to display.
 INFO:  R -  Reset/Clear search parameters.
 INFO:  S -  Search parts database using the selected parameters.
 INFO:  SP - Toggle Show only parts where stock > 0.
 INFO:  OP - Toggle One Off Only Pricing.
 INFO:  FL - Enter a list of fields/columns to display.
+INFO:  OF - Enter the field/column to order to display.
 INFO:  CS - Enter a list of field/column sizes.
-INFO:  OF - Enter the field/column to order the output on.
+INFO:  MA - Enter the maximum number of parts to display.
 INFO:  
 INPUT: Option: s
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -354,12 +357,12 @@ INPUT: Press enter to return to parts selection:
 
 The search tool provides the following functionality.
 
-- C  : Select a part category for a part. This option displays a list of all the JLCPCB part catagories.
+- C  : Select a part category for a part. This option displays a list of all the JLCPCB part categories.
 - M  : The manufactures part number for the device/part that you wish to search for.
-- D  : Enter test that occurs in the part description field.
-- P  : Enter test that appears in the package type field.
+- D  : Enter text that occurs in the part description field.
+- P  : Enter text that appears in the package type field.
+- J  : Enter the text that occurs in the JLCPCB part number field.
 - T  : The part type (Basic or Extended).
-- N  : The maximum number of search matched parts to display.
 - R  : This resets the search parameters (Displayed under 'Current Search Parameters').
 - S  : Search through the database for a matching part.
 - SP : Toggle the option to only show parts where the stock is > 0.
@@ -367,7 +370,7 @@ The search tool provides the following functionality.
 - FL : This option allows the user to select which fields from the database should appear as columns in the search results.
 - CS : Enter a list of column sizes for the selected fields. You may wish to truncate some columns depending upon the screen size on your computer.
 - OF : This option allows you to select the field/column that you wish to order search results on.
-
+- MA : Sets the limit on the maximum number of rows to be displayed.
 
 
 Returning to the window
@@ -390,7 +393,7 @@ optional arguments:
   -f, --find        Find parts in the local copy of the JLCPCB parts database.
   -u, --update      Update the local copy of the JLCPCB parts database.
   -n, --no_preview  Do not preview files. The default is to preview the gerber files using either gerbv or the gerbview programs.
-  -s                Show the Kicad settings required to generate gerbers for JLCPCB. Also the Kicad/JCLPCB helper link is opened using the default web browser.
+  -s                Show the Kicad settings required to generate gerbers for JLCPCB. Also the Kicad/JLCPCB helper link is opened using the default web browser.
   -v, --view_zip    View zip file. This option can be used if the user only wants to view the contents of an existing zip files containing PCB gerber files.
   --gerbview        Use gerbview (Included with KiCad) not the default gerbv program which must be installed separately ('sudo apt install gerbv') to view gerbers.
 ```

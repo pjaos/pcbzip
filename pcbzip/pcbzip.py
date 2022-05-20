@@ -1306,7 +1306,7 @@ class PCBFileProcessor(object):
         
     def downloadJLCPCBDatabase(self):
         """@brief Download the latest JLC PCB parts database."""
-        #self._jlcPCBDatabase.downloadJLCPCBPartsdDB()
+        self._jlcPCBDatabase.downloadJLCPCBPartsdDB()
         self._jlcPCBDatabase.createPartsDB()
 
 if __name__ == "__main__":
