@@ -575,6 +575,9 @@ class JLCPCBDatabase(object):
         print(JLCPCBDatabase.HORIZONTAL_TABLE_BORDER_CHAR*self._rowLength)
         
     def _getColText(self, colText, colWidth):
+        if not isinstance(colText, str):
+            colText = str(colText)
+            
         _colText = str(colText)
         if len(_colText) > colWidth:
             colStr = colText[0:colWidth]
