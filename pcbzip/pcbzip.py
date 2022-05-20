@@ -10,6 +10,8 @@ import csv
 import contextlib
 import sqlite3
 import webbrowser
+import os
+import json
 
 from   time import sleep, time
 from   os import listdir, getcwd, system, path, makedirs, remove, environ
@@ -153,6 +155,7 @@ class JLCPCBDatabase(object):
     def __init__(self, uio):
         self._uio = uio
         self._dBSearch = DBSearch()
+        self._dBSearch.load()
         self._rowLength = None
         
     def _info(self, msg):
@@ -229,14 +232,14 @@ class JLCPCBDatabase(object):
         self._info("P -  Enter a part package.")
         self._info("J -  JLCPCB part number.")
         self._info("T -  Enter a part type (Basic or Extended).")
-        self._info("N -  Enter the maximum number of parts to display.")
         self._info("R -  Reset/Clear search parameters.")
         self._info("S -  Search parts database using the selected parameters.")
         self._info("SP - Toggle Show only parts where stock > 0.")
         self._info("OP - Toggle One Off Only Pricing.")
         self._info("FL - Enter a list of fields/columns to display.")
+        self._info("OF - Enter the field/column to order to display.")
         self._info("CS - Enter a list of field/column sizes.")
-        self._info("OF - Enter the field/column to order the output on.")
+        self._info("MA - Enter the maximum number of parts to display.")
         self._info("")
         
     def _showSearchParams(self):
@@ -274,9 +277,6 @@ class JLCPCBDatabase(object):
             elif response.lower() == 'j':
                 self._dBSearch.jclPcbPartNumber = self._uio.input("Enter the JLCPCB part number to search for: ")
                 
-            elif response.lower() == 'n':
-                self._dBSearch.maxPartCount = self._uio.inputDecInt("Enter the max number of searched parts to display: ", 1, 1000000)
-
             elif response.lower() == 't':
                 self._dBSearch.type = self._uio.input("Enter the type of part (Basic or Extended): ")
 
@@ -295,12 +295,17 @@ class JLCPCBDatabase(object):
             elif response.lower() == 'of':
                 self._enterOrderField()
                 
-            elif response.lower() == 'r':
+            elif response.lower() == 'ma':
+                self._dBSearch.maxPartCount = self._uio.inputDecInt("Enter the max number of searched parts to display: ", 1, 1000000)
+
+            self._dBSearch.save()
+            
+            if response.lower() == 'r':
                 self._dBSearch.init()
                 
             elif response.lower() == 's':
                 self._searchD()
-        
+                 
     def _selectCategory(self):
         """@brief SElect category."""
         self._info("Category List.")
@@ -672,6 +677,20 @@ class DBSearch(object):
                            JLCPCBDatabase.DESCRIPTION)
     DEFAULT_COLUMN_SIZES = (9,7,25,25,8,12,90)
     JLCPCB_KICAD_URL = "https://support.jlcpcb.com/article/84-how-to-generate-the-bom-and-centroid-file-from-kicad"
+    CONFIG_FILENAME = ".jclpcb_search_params.cfg"
+    
+    CATAGORY_ATTR               = "CATAGORY_ATTR"
+    MFG_PART_NUMBER_ATTR        = "MFG_PART_NUMBER_ATTR"
+    DESCRIPTION_ATTR            = "DESCRIPTION_ATTR"
+    PACKAGE_ATTR                = "PACKAGE_ATTR"
+    JCLPCB_PART_NUMBER_ATTR     = "JCLPCB_PART_NUMBER"
+    TYPE_ATTR                   = "TYPE_ATTR"
+    STOCK_ONLY_ATTR             = "STOCK_ONLY_ATTR"
+    ONE_OFF_PRICING_ONLY_ATTR   = "ONE_OFF_PRICING_ONLY_ATTR"
+    ORDER_FIELD_ID_ATTR         = "ORDER_FIELD_ID_ATTR"
+    FIELD_LIST_ATTR             = "FIELD_LIST_ATTR"
+    COLUMN_WIDTH_LIST_ATTR      = "COLUMN_WIDTH_LIST_ATTR"
+    MAX_PART_COUNT_ATTR         = "MAX_PART_COUNT_ATTR"
 
     @staticmethod
     def GetBoolString(boolValue):
@@ -680,6 +699,21 @@ class DBSearch(object):
             return "Yes"
         return "No"
     
+    @staticmethod
+    def GetHomePath():
+        """Get the user home path as this will be used to store config files"""
+        if "HOME" in os.environ:
+            return os.environ["HOME"]
+    
+        elif "HOMEDRIVE" in os.environ and "HOMEPATH" in os.environ:
+            return os.environ["HOMEDRIVE"] + os.environ["HOMEPATH"]
+    
+        elif "USERPROFILE" in os.environ:
+            return os.environ["USERPROFILE"]
+    
+        return None
+
+
     def __init__(self):
         self.init()
         
@@ -698,6 +732,49 @@ class DBSearch(object):
         self.columnWidthList    = ",".join(map(str, DBSearch.DEFAULT_COLUMN_SIZES))
         self.maxPartCount       = 1000   
         
+        self._cfgFile = os.path.join( DBSearch.GetHomePath(), DBSearch.CONFIG_FILENAME)
+        
+    def save(self):
+        """@brief Save the state of the instance to the config file."""
+        saveDict = {DBSearch.CATAGORY_ATTR:             self.catagory,
+                    DBSearch.MFG_PART_NUMBER_ATTR:      self.mfgPartNumber,
+                    DBSearch.DESCRIPTION_ATTR:          self.description,
+                    DBSearch.PACKAGE_ATTR:              self.package,
+                    DBSearch.JCLPCB_PART_NUMBER_ATTR:   self.jclPcbPartNumber,
+                    DBSearch.TYPE_ATTR:                 self.type,
+                    DBSearch.STOCK_ONLY_ATTR:           self.stockOnly,
+                    DBSearch.ONE_OFF_PRICING_ONLY_ATTR: self.oneOffPricingOnly,
+                    DBSearch.ORDER_FIELD_ID_ATTR:       self.orderFieldID,
+                    DBSearch.FIELD_LIST_ATTR:           self.fieldList,
+                    DBSearch.COLUMN_WIDTH_LIST_ATTR:    self.columnWidthList,
+                    DBSearch.MAX_PART_COUNT_ATTR:       self.maxPartCount
+                    }
+        json.dump(saveDict, open(self._cfgFile, "w"), sort_keys=True)
+
+    def load(self):
+        """@brief Load the state of the instance from the confile file."""
+        try:
+            fp = open(self._cfgFile, 'r')
+            loadDict = json.load(fp)
+            fp.close()
+            
+            self.catagory = loadDict[DBSearch.CATAGORY_ATTR]
+            self.mfgPartNumber = loadDict[DBSearch.MFG_PART_NUMBER_ATTR]
+            self.description = loadDict[DBSearch.DESCRIPTION_ATTR]
+            self.package = loadDict[DBSearch.PACKAGE_ATTR]
+            self.jclPcbPartNumber = loadDict[DBSearch.JCLPCB_PART_NUMBER_ATTR]
+            self.type = loadDict[DBSearch.TYPE_ATTR]
+            self.stockOnly = loadDict[DBSearch.STOCK_ONLY_ATTR]
+            self.oneOffPricingOnly = loadDict[DBSearch.ONE_OFF_PRICING_ONLY_ATTR]
+            self.orderFieldID = loadDict[DBSearch.ORDER_FIELD_ID_ATTR]
+            self.fieldList = loadDict[DBSearch.FIELD_LIST_ATTR]
+            self.columnWidthList = loadDict[DBSearch.COLUMN_WIDTH_LIST_ATTR]
+            self.maxPartCount = loadDict[DBSearch.MAX_PART_COUNT_ATTR]
+           
+        except:
+            pass
+
+        
     def getLines(self):
         """@return The state of the object as a number of lines of text."""
         fields = self.fieldList.split(",")
@@ -713,7 +790,7 @@ class DBSearch(object):
         lines.append("Field List:                  {}".format( self.fieldList ))
         lines.append("Show Order Field:            {}".format( fields[self.orderFieldID-1] )) 
         lines.append("Field Column Width List:     {}".format( self.columnWidthList ))
-        lines.append("Max Part Count:  {}".format(self.maxPartCount))
+        lines.append("Max Part Count:              {}".format(self.maxPartCount))
         return lines
     
 class PCBFileProcessor(object):
