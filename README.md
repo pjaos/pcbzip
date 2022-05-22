@@ -242,18 +242,21 @@ file is updated.
 
 ## Searching JLCPCB Parts Database
 
-At this point you need to open a terminal window. The current state of the JLCPCB parts database should be downloaded using the following command so that you have an up to date copy.
+At this point you need to open a terminal window. The current state of the JLCPCB parts database should be downloaded using the following command so that you have a local, up to date copy of the available JLCPCB parts. Run the command below to do this.
 
 ```
-INFO:  Created /home/auser/.jlcpcb
+pcbzip -u
+INFO:  Deleted existing /home/auser/.jlcpcb/parts.csv file.
 INFO:  Downloading https://jlcpcb.com/componentSearch/uploadComponentInfo
-100% [......................................................................] 367284675 / 367284675INFO:  Took 29.1 seconds to download /home/auser/.jlcpcb/parts.csv
+100% [......................................................................] 367401506 / 367401506
+INFO:  Took 28.4 seconds to download /home/pja/.jlcpcb/parts.csv
 INFO:  Updated /home/auser/.jlcpcb/parts.csv.date with creation date.
+INFO:  Deleted existing /home/auser/.jlcpcb/parts.db file.
 INFO:  Creating /home/auser/.jlcpcb/parts.db file from /home/auser/.jlcpcb/parts.csv file...
-INFO:  Took 8.9 seconds to create /home/auser/.jlcpcb/parts.db
+INFO:  Took 7.5 seconds to create /home/auser/.jlcpcb/parts.db
 ```
 
-The time this takes to complete will be largely dependent upon your Internet access speed.
+The time this takes to complete will be largely dependent upon your Internet access speed and how fast your Linux computer is.
 
 Now you have a local copy of the parts database you can search it to find the part you require using the following command.
 
