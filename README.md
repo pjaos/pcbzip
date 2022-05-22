@@ -102,7 +102,7 @@ The gerbv program will then be called to view the gerber files. When this is clo
 containing the zip file containing the gerber files (in this case myproject_v1.0_jlcpcb.zip). This is the file that can be uploaded to JLCPCB in order to manufacture the PCB.
 
 
-## Creating and assembling a PCB using JLCPCB
+# Creating and assembling a PCB using JLCPCB
 
 If you wish JLCPCB to manufacture a PCB and assemble it then along with the zip file you need to supply the following files. 
 
@@ -184,9 +184,9 @@ INFO:  - A Abort BOM file edit.
 INPUT: 
 ```
 
-At this point you'll need another terminal window open displaying the JLCPCB parts database. Details on this can be found in the [Searching JLCPCB Parts Database](## Searching JLCPCB Parts Database) section of this document.
+At this point you'll need another terminal window open displaying the JLCPCB parts database. Details on this can be found in the [Searching JLCPCB Parts Database](#Searching JLCPCB Parts Database) section of this document.
 
-Once you have found the JLCPCB part number for the part to be fitted enter it.
+Once you have found the JLCPCB part number for the part to be fitted enter it. The next part in the BOM will then be displayed.
 
 E.G
 
@@ -240,7 +240,7 @@ file part assignment process then you can pick up where you left off at another 
 file is updated.
 
 
-## Searching JLCPCB Parts Database
+# Searching JLCPCB Parts Database
 
 At this point you need to open a terminal window. The current state of the JLCPCB parts database should be downloaded using the following command so that you have a local, up to date copy of the available JLCPCB parts. Run the command below to do this.
 
@@ -358,6 +358,8 @@ INPUT: Option: s
 INPUT: Press enter to return to parts selection: 
 ```
 
+Once you have the JLCPCB part number you can copy it into the terminal window under [Creating and assembling a PCB using JLCPCB](#Creating and assembling a PCB using JLCPCB) and an then move on to the next part.
+
 The search tool provides the following functionality.
 
 - C  : Select a part category for a part. This option displays a list of all the JLCPCB part categories.
@@ -376,7 +378,6 @@ The search tool provides the following functionality.
 - MA : Sets the limit on the maximum number of rows to be displayed.
 
 
-Returning to the window
 
 
 # Command line help
