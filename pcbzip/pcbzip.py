@@ -240,6 +240,7 @@ class JLCPCBDatabase(object):
         self._info("OF - Enter the field/column to order to display.")
         self._info("CS - Enter a list of field/column sizes.")
         self._info("MA - Enter the maximum number of parts to display.")
+        self._info("BA - Create a CSV file detailing all basic parts.")
         self._info("")
         
     def _showSearchParams(self):
@@ -250,6 +251,23 @@ class JLCPCBDatabase(object):
         self._info("")
         for line in lines:
             self._info(line)
+        
+    def _getType(self):
+        """@brief Allow the user to enter the type of part, basic extended or none (any)."""
+        partType = ""
+        self._info("Enter the type of part required")
+        self._info("b      = Basic")
+        self._info("e      = Extended")
+        self._info("If not b or e then either Basic or Extended parts will be searched for")
+        response = self._uio.input("Enter the type of part: ")
+        response = response.lower()
+        if response == 'b':
+            partType = "Basic"
+
+        elif response == 'e':
+            partType = "Extended"
+
+        return partType
         
     def search(self):
         """Search the database for parts that meet the given parameters."""
@@ -278,7 +296,7 @@ class JLCPCBDatabase(object):
                 self._dBSearch.jclPcbPartNumber = self._uio.input("Enter the JLCPCB part number to search for: ")
                 
             elif response.lower() == 't':
-                self._dBSearch.type = self._uio.input("Enter the type of part (Basic or Extended): ")
+                self._dBSearch.type = self._getType()
 
             elif response.lower() == 'sp':
                 self._dBSearch.stockOnly = not self._dBSearch.stockOnly
@@ -305,7 +323,52 @@ class JLCPCBDatabase(object):
                 
             if response.lower() == 's':
                 self._searchD()
+
+            if response.lower() == 'ba':
+                self._basicCSV()
                  
+    def _basicCSV(self):
+        """@brief Create a CSV file containing all the Basic parts.
+           @detail The CSV file contains the fields."""
+        fieldList = []
+        
+        fieldList.append(JLCPCBDatabase.FIRST_CATEGORY)
+        fieldList.append(JLCPCBDatabase.STOCK)
+        fieldList.append(JLCPCBDatabase.MFG_PART)
+        fieldList.append(JLCPCBDatabase.DESCRIPTION)
+        fieldList.append(JLCPCBDatabase.PACKAGE)
+        fieldList.append(JLCPCBDatabase.LCSC_PART)
+        fieldList.append(JLCPCBDatabase.PRICE)
+        fieldList.append(JLCPCBDatabase.MANUFACTURER)
+        fieldList.append(JLCPCBDatabase.DATASHEET)
+        fieldList.append(JLCPCBDatabase.LIBRARY_TYPE)
+        dispColStr = ",".join(f'"{c}"' for c in fieldList)
+        queryStr = 'SELECT {} FROM parts WHERE '.format(dispColStr)
+        queryStr += '"Library Type" LIKE "%Basic%"'
+        queryStr += ' ORDER BY "First Category","Stock"'
+        
+        opFile = os.path.join( tempfile.gettempdir(), "jclpcb_basic_parts.csv")
+        self._uio.debug("SQL query: {}".format(queryStr))
+        with contextlib.closing(sqlite3.connect(JLCPCBDatabase.JLCPCB_SQLITE_DB_FILE)) as con:
+            with con as cur:
+                results =  cur.execute(queryStr).fetchall()
+                partCount = len(results)
+                fd = open(opFile, 'w')
+                fd.write("{}\n".format( ",".join(fieldList)))
+                for result in results:
+                    colList = []
+                    colIndex=0
+                    for col in result:
+                        # If Price we modify the column as price contains comma separated text
+                        if fieldList[colIndex] == 'Price':
+                            colList.append( self._getPrice(col, 50) )
+                        else:
+                            colList.append( str(col).replace(",", "") )
+                        colIndex += 1
+                    fd.write("{}\n".format( ",".join(colList) ))
+                fd.close()
+                self._info("Created {} containing {} Basic parts.".format(opFile, partCount))
+
     def _selectCategory(self):
         """@brief SElect category."""
         self._info("Category List.")
@@ -405,13 +468,27 @@ class JLCPCBDatabase(object):
         """@brief Enter the field to order the output on."""
         self._showSelectedFieldTable()
         fieldList = self._dBSearch.fieldList.split(",")
-        while True:
-            orderFieldID = self._uio.inputDecInt("Enter the ID of the field to order the search results: ", minValue=1, maxValue=len(fieldList))
-            if orderFieldID < 1 or orderFieldID > len(fieldList):
-                self._error("{} is an invalid field ID.".format(orderFieldID))
-            else:
-                self._dBSearch.orderFieldID = orderFieldID
-                break
+        self._dBSearch.orderFieldIDList = []
+        validEntry = False
+        while not validEntry:
+            orderFieldIDList = self._uio.input("Enter the ID or comma separated list of ID's of the field to order the search results: ")
+            elems = orderFieldIDList.split(",")
+            if len(elems) > 0:
+                    validEntry = True
+                    for elem in elems:
+                        try:
+                            fieldID = int(elem)
+                        except ValueError:
+                            self._error("{} is an invalid field ID.".format(elem))
+                            validEntry = False
+                            
+                        if fieldID < 1 or fieldID > len(fieldList):
+                            self._error("{} is an invalid field ID. Must be 1 to {}.".format(fieldID, len(fieldList)))
+                            validEntry = False
+                            
+                        if validEntry:
+                            self._dBSearch.orderFieldIDList.append(fieldID)
+                    break
     
     def _getSQLSearchCmd(self, addDataSheet=False):
         """@brief Get the SQL command to search the data base.
@@ -463,17 +540,21 @@ class JLCPCBDatabase(object):
 
         if not searchValid:
             self._error("No search parameters entered.")
-            return
+            return (None, None)
         
         queryStr += " AND ".join(qList)
-        queryStr += ' ORDER BY "{}"'.format(fields[self._dBSearch.orderFieldID-1])
+        queryStr += ' ORDER BY "{}"'.format( self._dBSearch.getOrderedFieldList() )
         queryStr += " LIMIT {}".format(self._dBSearch.maxPartCount)
         return (queryStr, fields)
     
     def _search(self):
         """@brief Perform the database search and display the results.
            @return The db search results."""
+
         queryStr, fields = self._getSQLSearchCmd()
+        if queryStr is None and fields is None:
+            return None
+
         colWidthList = self._dBSearch.columnWidthList.split(",")
         self._uio.debug("SQL query: {}".format(queryStr))
         with contextlib.closing(sqlite3.connect(JLCPCBDatabase.JLCPCB_SQLITE_DB_FILE)) as con:
@@ -521,7 +602,8 @@ class JLCPCBDatabase(object):
         """@brief Search for parts and allow the user to view data sheets."""
         while True:
             searchResults = self._search()
-            self._info("- Enter the item number to view the datasheet on a part.")
+            if searchResults is not None:
+                self._info("- Enter the item number to view the datasheet on a part.")
             self._info("- Press enter to return to parts selection.")
             response = self._uio.input("")
             try:
@@ -534,6 +616,9 @@ class JLCPCBDatabase(object):
         """@brief Show the datasheet for the item.
            @param itemNumber The number of the data sheet in the search results."""
         queryStr, fields = self._getSQLSearchCmd(addDataSheet=True)
+        if queryStr is None and fields is None:
+            self._error("No search parameters entered.")
+            return
         self._uio.debug("SQL query: {}".format(queryStr))
         with contextlib.closing(sqlite3.connect(JLCPCBDatabase.JLCPCB_SQLITE_DB_FILE)) as con:
             with con as cur:
@@ -556,7 +641,7 @@ class JLCPCBDatabase(object):
                     priceList.append("{}:${:.2f}".format(qty,price))
                 except ValueError:
                     pass
-        return self._getColText(" ".join(priceList), colWidth)      
+        return self._getColText(" ".join(priceList), colWidth)
     
     def _showTableHeader(self):
         """@brief Show the result able header."""
@@ -678,7 +763,7 @@ class DBSearch(object):
                            JLCPCBDatabase.LIBRARY_TYPE,
                            JLCPCBDatabase.PRICE,
                            JLCPCBDatabase.DESCRIPTION)
-    DEFAULT_COLUMN_SIZES = (9,7,25,25,8,12,90)
+    DEFAULT_COLUMN_SIZES = (9,8,25,25,8,12,90)
     JLCPCB_KICAD_URL = "https://support.jlcpcb.com/article/84-how-to-generate-the-bom-and-centroid-file-from-kicad"
     CONFIG_FILENAME = ".jclpcb_search_params.cfg"
     
@@ -730,7 +815,7 @@ class DBSearch(object):
         self.type               = ""
         self.stockOnly          = True
         self.oneOffPricingOnly  = False
-        self.orderFieldID       = 2
+        self.orderFieldIDList       = (2,)
         self.fieldList          = ",".join(DBSearch.DEFAULT_COLUMN_LIST)
         self.columnWidthList    = ",".join(map(str, DBSearch.DEFAULT_COLUMN_SIZES))
         self.maxPartCount       = 1000   
@@ -747,7 +832,7 @@ class DBSearch(object):
                     DBSearch.TYPE_ATTR:                 self.type,
                     DBSearch.STOCK_ONLY_ATTR:           self.stockOnly,
                     DBSearch.ONE_OFF_PRICING_ONLY_ATTR: self.oneOffPricingOnly,
-                    DBSearch.ORDER_FIELD_ID_ATTR:       self.orderFieldID,
+                    DBSearch.ORDER_FIELD_ID_ATTR:       self.getOrderedFieldIDList(),
                     DBSearch.FIELD_LIST_ATTR:           self.fieldList,
                     DBSearch.COLUMN_WIDTH_LIST_ATTR:    self.columnWidthList,
                     DBSearch.MAX_PART_COUNT_ATTR:       self.maxPartCount
@@ -769,7 +854,7 @@ class DBSearch(object):
             self.type = loadDict[DBSearch.TYPE_ATTR]
             self.stockOnly = loadDict[DBSearch.STOCK_ONLY_ATTR]
             self.oneOffPricingOnly = loadDict[DBSearch.ONE_OFF_PRICING_ONLY_ATTR]
-            self.orderFieldID = loadDict[DBSearch.ORDER_FIELD_ID_ATTR]
+            self.orderFieldIDList = loadDict[DBSearch.ORDER_FIELD_ID_ATTR]
             self.fieldList = loadDict[DBSearch.FIELD_LIST_ATTR]
             self.columnWidthList = loadDict[DBSearch.COLUMN_WIDTH_LIST_ATTR]
             self.maxPartCount = loadDict[DBSearch.MAX_PART_COUNT_ATTR]
@@ -777,6 +862,28 @@ class DBSearch(object):
         except:
             pass
 
+    def getOrderedFieldIDList(self):
+        """@brief Get a list of ordered fields."""
+        orderFieldIDList = []
+        # Old configs may store a single int value rather than a list of ints
+        if isinstance(self.orderFieldIDList, int):
+            orderFieldIDList.append(self.orderFieldIDList)
+        else:
+            orderFieldIDList=self.orderFieldIDList
+        return orderFieldIDList        
+         
+    def getOrderedFieldList(self):
+        """@brief Get a comma seprated list of the sort order fields."""
+        fields = self.fieldList.split(",")
+        
+        # Old configs may store a single int value rather than a list of ints
+        if isinstance(self.orderFieldIDList, int):
+            return fields[self.orderFieldIDList-1]
+        
+        fieldNameList = []
+        for fieldID in self.orderFieldIDList:
+            fieldNameList.append( fields[fieldID-1] )
+        return ",".join(fieldNameList)
         
     def getLines(self):
         """@return The state of the object as a number of lines of text."""
@@ -791,7 +898,7 @@ class DBSearch(object):
         lines.append("Show Only Stock > 0:         {}".format( DBSearch.GetBoolString( self.stockOnly )))
         lines.append("Show Only One Off Pricing:   {}".format( DBSearch.GetBoolString( self.oneOffPricingOnly) ))
         lines.append("Field List:                  {}".format( self.fieldList ))
-        lines.append("Show Order Field:            {}".format( fields[self.orderFieldID-1] )) 
+        lines.append("Show Order Field:            {}".format( self.getOrderedFieldList() )) 
         lines.append("Field Column Width List:     {}".format( self.columnWidthList ))
         lines.append("Max Part Count:              {}".format(self.maxPartCount))
         return lines
