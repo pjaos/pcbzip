@@ -52,11 +52,15 @@ class UIO(object):
            @param msg The message text."""
         print(msg)
         
-    def input(self, prompt):
+    def input(self, prompt, stripWhiteSpace=True):
         """@brief Get input from user.
            @param prompt The text presented to the user.
+           @param stripWhiteSpace If True then leading and trailing whitespace characters are removed from the user response.
            @return user input."""
-        return input("INPUT: {}".format(prompt))
+        response = input("INPUT: {}".format(prompt))
+        if stripWhiteSpace:
+            response = response.strip()
+        return response
     
     def inputDecInt(self, prompt, minValue, maxValue):
         """@brief Get a decimal integer number.
