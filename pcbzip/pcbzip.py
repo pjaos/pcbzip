@@ -119,6 +119,7 @@ class JLCPCBDatabase(object):
     JLCPCB_PARTS_FOLDER = join(GetHomePath(), ".jlcpcb")
     JLCPCB_CSV_DATE_FILE = join(JLCPCB_PARTS_FOLDER, JLCPCB_CSV_FILENAME + ".date")
     JLCPCB_CSV_FILE = join(JLCPCB_PARTS_FOLDER, JLCPCB_CSV_FILENAME)
+    JLCPCB_BASIC_PARTS_CSV_FILE = join(JLCPCB_PARTS_FOLDER, "jclpcb_basic_parts.csv")
     JLCPCB_SQLITE_DB_FILE = path.join(JLCPCB_PARTS_FOLDER, "parts.db")
     JLCPCB_KICAD_HELP_PAGE = "https://support.jlcpcb.com/article/84-how-to-generate-the-bom-and-centroid-file-from-kicad"
     CSV_URL = "https://jlcpcb.com/componentSearch/uploadComponentInfo"
@@ -240,7 +241,7 @@ class JLCPCBDatabase(object):
         self._info("OF - Enter the field/column to order to display.")
         self._info("CS - Enter a list of field/column sizes.")
         self._info("MA - Enter the maximum number of parts to display.")
-        self._info("BA - Create a CSV file detailing all basic parts.")
+        self._info("BA - JLCPCB Basic parts list.")
         self._info("")
         
     def _showSearchParams(self):
@@ -325,11 +326,14 @@ class JLCPCBDatabase(object):
                 self._searchD()
 
             if response.lower() == 'ba':
-                self._basicCSV()
+                self._info("Open the {} file with a spreadsheet app to view all JLCPCB Basic parts.".format(JLCPCBDatabase.JLCPCB_BASIC_PARTS_CSV_FILE))
+                self._info("This file is sorted by Catagory and then by Stock.")
+                self._info("- Press enter to return to parts selection.")
+                self._uio.input("")
                  
-    def _basicCSV(self):
-        """@brief Create a CSV file containing all the Basic parts.
-           @detail The CSV file contains the fields."""
+    def basicCSV(self):
+        """@brief Create a CSV file containing all the Basic parts."""
+        startT = time()
         fieldList = []
         
         fieldList.append(JLCPCBDatabase.FIRST_CATEGORY)
@@ -342,12 +346,13 @@ class JLCPCBDatabase(object):
         fieldList.append(JLCPCBDatabase.MANUFACTURER)
         fieldList.append(JLCPCBDatabase.DATASHEET)
         fieldList.append(JLCPCBDatabase.LIBRARY_TYPE)
+        fieldList.append(JLCPCBDatabase.SOLDER_JOINT)
         dispColStr = ",".join(f'"{c}"' for c in fieldList)
         queryStr = 'SELECT {} FROM parts WHERE '.format(dispColStr)
         queryStr += '"Library Type" LIKE "%Basic%"'
         queryStr += ' ORDER BY "First Category","Stock"'
         
-        opFile = os.path.join( tempfile.gettempdir(), "jclpcb_basic_parts.csv")
+        opFile = JLCPCBDatabase.JLCPCB_BASIC_PARTS_CSV_FILE
         self._uio.debug("SQL query: {}".format(queryStr))
         with contextlib.closing(sqlite3.connect(JLCPCBDatabase.JLCPCB_SQLITE_DB_FILE)) as con:
             with con as cur:
@@ -367,7 +372,7 @@ class JLCPCBDatabase(object):
                         colIndex += 1
                     fd.write("{}\n".format( ",".join(colList) ))
                 fd.close()
-                self._info("Created {} containing {} Basic parts.".format(opFile, partCount))
+                self._info("Took {:.1f} seconds to create {} containing all {} Basic parts.".format(time()-startT, opFile, partCount))
 
     def _selectCategory(self):
         """@brief SElect category."""
@@ -543,7 +548,7 @@ class JLCPCBDatabase(object):
             return (None, None)
         
         queryStr += " AND ".join(qList)
-        queryStr += ' ORDER BY "{}"'.format( self._dBSearch.getOrderedFieldList() )
+        queryStr += ' ORDER BY {}'.format( self._dBSearch.getSQLOrderedFieldList() )
         queryStr += " LIMIT {}".format(self._dBSearch.maxPartCount)
         return (queryStr, fields)
     
@@ -704,6 +709,7 @@ class JLCPCBDatabase(object):
         wget.download(JLCPCBDatabase.CSV_URL, out=csvFile)
         sleep(1.5)
         elapsedSeconds = time()-startTime
+        print("\r")
         self._info("Took {:.1f} seconds to download {}".format(elapsedSeconds, csvFile))
                   
         fd = open(csvDateFile, 'w')
@@ -752,6 +758,8 @@ class JLCPCBDatabase(object):
         
         elapsedSeconds = time()-startTime
         self._info("Took {:.1f} seconds to create {}".format(elapsedSeconds, JLCPCBDatabase.JLCPCB_SQLITE_DB_FILE))
+        
+        basicPartsFile = self.basicCSV()
 
 class DBSearch(object):
     """@brief Holds the parameters to search through the parts database."""
@@ -885,6 +893,19 @@ class DBSearch(object):
             fieldNameList.append( fields[fieldID-1] )
         return ",".join(fieldNameList)
         
+    def getSQLOrderedFieldList(self):
+        """@brief Get a list of fields to order the search by in the format required by an SQL command."""
+        fields = self.fieldList.split(",")
+        
+        # Old configs may store a single int value rather than a list of ints
+        if isinstance(self.orderFieldIDList, int):
+            return '"{}"'.format( fields[self.orderFieldIDList-1] )
+        
+        fieldNameList = []
+        for fieldID in self.orderFieldIDList:
+            fieldNameList.append( '"{}"'.format( fields[fieldID-1] ) )
+        return ",".join(fieldNameList)
+    
     def getLines(self):
         """@return The state of the object as a number of lines of text."""
         fields = self.fieldList.split(",")
