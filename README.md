@@ -291,6 +291,7 @@ INFO:  FL - Enter a list of fields/columns to display.
 INFO:  OF - Enter the field/column to order to display.
 INFO:  CS - Enter a list of field/column sizes.
 INFO:  MA - Enter the maximum number of parts to display.
+INFO:  BA - JLCPCB Basic parts list.
 INFO:  
 INPUT: Option: 
 ```
@@ -316,6 +317,7 @@ INFO:  FL - Enter a list of fields/columns to display.
 INFO:  OF - Enter the field/column to order to display.
 INFO:  CS - Enter a list of field/column sizes.
 INFO:  MA - Enter the maximum number of parts to display.
+INFO:  BA - JLCPCB Basic parts list.
 INFO:  
 INPUT: Option: M
 INPUT: Enter the MFG part number: ADS1115
@@ -348,6 +350,7 @@ INFO:  FL - Enter a list of fields/columns to display.
 INFO:  OF - Enter the field/column to order to display.
 INFO:  CS - Enter a list of field/column sizes.
 INFO:  MA - Enter the maximum number of parts to display.
+INFO:  BA - JLCPCB Basic parts list.
 INFO:  
 INPUT: Option: s
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -376,9 +379,8 @@ The search tool provides the following functionality.
 - CS : Enter a list of column sizes for the selected fields. You may wish to truncate some columns depending upon the screen size on your computer.
 - OF : This option allows you to select the field/column that you wish to order search results on.
 - MA : Sets the limit on the maximum number of rows to be displayed.
-
-
-
+- BA : The option displays the location of the CSV file containing all Basic JLCPCB parts to allow the user to pull them into a spreadsheet application.
+       This makes it easier for users to include Basic parts into their PCB designs.
 
 # Command line help
 
