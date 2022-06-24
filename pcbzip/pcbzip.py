@@ -725,7 +725,8 @@ class JLCPCBDatabase(object):
         self._info("Updated {} with creation date.".format(csvDateFile))
 
     def createPartsDB(self):
-        """@brief Create the sqllite parts database from a downloaded CSV file."""
+        """@brief Create the sqllite parts database from a downloaded CSV file.
+           @return The JCLPCB basic parts CSV file."""
         csvFile = JLCPCBDatabase.JLCPCB_CSV_FILE
         csvFileSize = path.getsize(csvFile)
         
@@ -764,6 +765,7 @@ class JLCPCBDatabase(object):
         self._info("Took {:.1f} seconds to create {}".format(elapsedSeconds, JLCPCBDatabase.JLCPCB_SQLITE_DB_FILE))
         
         basicPartsFile = self.basicCSV()
+        return basicPartsFile
 
 class DBSearch(object):
     """@brief Holds the parameters to search through the parts database."""
@@ -912,7 +914,6 @@ class DBSearch(object):
     
     def getLines(self):
         """@return The state of the object as a number of lines of text."""
-        fields = self.fieldList.split(",")
         lines = []
         lines.append("Category:                    {}".format(self.catagory))
         lines.append("MFG Part Number:             {}".format(self.mfgPartNumber))
