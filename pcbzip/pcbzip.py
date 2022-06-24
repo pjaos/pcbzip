@@ -1455,7 +1455,7 @@ if __name__ == "__main__":
         parser.add_argument("-u", "--update",       help="Update the local copy of the JLCPCB parts database.", action='store_true')
         parser.add_argument("-n", "--no_preview",   help="Do not preview files. The default is to preview the gerber files using either gerbv or the gerbview programs.", action='store_true')
         parser.add_argument("-s",                   help="Show the Kicad settings required to generate gerbers for JLCPCB. Also the Kicad/JLCPCB helper link is opened using the default web browser.", action="store_true")
-        parser.add_argument("-v", "--view_zip",     help="View zip file. This option can be used if the user only wants to view the contents of an existing zip files containing PCB gerber files.", action="store_true")
+        parser.add_argument("-v", "--view_zip",     help="The gerber zip file to view. This option can be used if the user only wants to view the contents of an existing zip files containing PCB gerber files.")
         parser.add_argument("--gerbview",           help="Use gerbview (Included with KiCad) not the default gerbv program which must be installed separately ('sudo apt install gerbv') to view gerbers.", action="store_true")
 
         options = parser.parse_args()
@@ -1464,7 +1464,7 @@ if __name__ == "__main__":
         uio.enableDebug(options.debug)
         
         if options.view_zip:
-            pcbFileProcessor.gerbvFiles(options.v, options.gerbview)
+            pcbFileProcessor.gerbvFiles(options.view_zip, options.gerbview)
 
         elif options.s:
             pcbFileProcessor.showKicadSettings()
