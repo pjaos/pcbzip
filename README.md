@@ -1,7 +1,7 @@
 # pcbzip
 
 ## Description
-A command line tool to ease the process of creating the files required to manufacture a PCB 
+A command line tool to ease the process of creating the files required to manufacture a PCB
 using KiCad.
 
 # Installation
@@ -42,10 +42,10 @@ WARNING: Running pip as the 'root' user can result in broken permissions and con
 This should be installed onto a Linux machine that has KiCad installed.
 gerbv should also be installed onto the local machine ('sudo apt install gerbv').
 
-# Using the tool 
+# Using the tool
 
-The pcbzip tool allows the user to create a zip file containing the gerber files for a PCB which can be supplied to the 
-manufacturer so that they can make the PCB. Also (if Kicad 6 and JLCPCB is selected) it allows the user to create the 
+The pcbzip tool allows the user to create a zip file containing the gerber files for a PCB which can be supplied to the
+manufacturer so that they can make the PCB. Also (if Kicad 6 and JLCPCB is selected) it allows the user to create the
 Bill Of MAterials (BOM) file and component placement files required for PCB assembly.
 
 
@@ -70,7 +70,7 @@ INFO:  SeedStudio:        1
 INFO:  PCBWay:            2
 INFO:  JLCPCB (Kicad V5): 3
 INFO:  JLCPCB (Kicad V6): 4
-INPUT: Manufacturer: 
+INPUT: Manufacturer:
 ```
 
 Enter option 4.
@@ -104,7 +104,7 @@ containing the zip file containing the gerber files (in this case myproject_v1.0
 
 # Creating and assembling a PCB using JLCPCB
 
-If you wish JLCPCB to manufacture a PCB and assemble it then along with the zip file you need to supply the following files. 
+If you wish JLCPCB to manufacture a PCB and assemble it then along with the zip file you need to supply the following files.
 
 - Zip file containing the gerber files.
 - A Bill Of Materials (BOM) file.
@@ -125,7 +125,7 @@ INFO:  SeedStudio:        1
 INFO:  PCBWay:            2
 INFO:  JLCPCB (Kicad V5): 3
 INFO:  JLCPCB (Kicad V6): 4
-INPUT: Manufacturer: 
+INPUT: Manufacturer:
 ```
 
 Enter option 4.
@@ -154,13 +154,47 @@ INFO:  Created ./myproject_1.1_pcb_files/myproject_v1.1_jlcpcb.zip
 INPUT: PCB side to which SMD components are to be added, t (top) or b (bottom): t
 ```
 
-If at this point you get the following error then you have not created the placement files using KiCad. 
 Note !!!
 The project name must be the same as the KiCad project name.
+
+If you created the project previously and partially updated the assembly information then You'll be
+asked if you want to overwrite the project.
+
+```
+INFO:  The ./myproject_1.0_pcb_files folder already exists.
+INPUT: Overwrite ? y/n: n
+```
+
+If you select 'y' then all previous data is overwritten and you'll need to enter all assembly data
+again. Selecting 'n' will start from where you left the project previously.
+
+If at this point you get the following error then you have not created the BOM files using KiCad.
+
+```
+ERROR: Failed to find the BOM file (myproject.csv) in ['.', '..'].
+```
+
+If this occurs then open KiCad PCB and select 'File / Fabrication Outputs / BOM)...'. Then select the 'Save' button. When you've created this file restart pcbzip.
+
+
+If at this point you get the following error then you have not created the placement files using KiCad.
 
 ```
 ERROR: Failed to find the placement file (myproject-top-pos.csv) in ['.', '..'].
 ```
+
+If this occurs then open KiCad PCB and select 'File / Fabrication Outputs / Component Placement (pos)...'. Then select the 'Generate Position File' button. When you've created this file restart pcbzip.
+
+The first time that you run pcbzip yu'll be asked if you wish to fixup the BOM file format as shown below.
+
+```
+ERROR: Invalid BOM line: "Id";"Designator";"Package";"Quantity";"Designation";"Supplier and ref";
+ERROR: Should have four fields (Comment,Designator,Footprint,LCSC)
+INPUT: Do you wish to fixup the BOM file format ? [y/n]: y
+INFO:  Updated ../myproject.csv
+```
+
+Enter 'y' to fixup the BOM file to the formay required by JLCPCB.
 
 When the KiCad BOM and component placement files are found the component placement file will be copied to the output folder and you will step through each component to assign a JLCPCB part number to each one that you wish JLCPCB to fit.
 
@@ -181,7 +215,7 @@ INFO:  - L to move to the last part
 INFO:  - N to move to the next part
 INFO:  - B to move back to the previous part
 INFO:  - A Abort BOM file edit.
-INPUT: 
+INPUT:
 ```
 
 At this point you'll need another terminal window open displaying the JLCPCB parts database. Details on this can be found in the [Searching JLCPCB Parts Database](#Searching JLCPCB Parts Database) section of this document.
@@ -231,12 +265,12 @@ INFO:  - L to move to the last part
 INFO:  - N to move to the next part
 INFO:  - B to move back to the previous part
 INFO:  - A Abort BOM file edit.
-INPUT: 
+INPUT:
 ```
 
 If you press enter without entering a part number then no JLCPCB part number is assigned to that part and JLCPCB will not fit it to the PCB.
-If you wish to move backwards and forwards through the list of parts in the BOM then the F,L,N,B entries can be used. If you abort the BOM 
-file part assignment process then you can pick up where you left off at another time if required because as each part is entered the BOM 
+If you wish to move backwards and forwards through the list of parts in the BOM then the F,L,N,B entries can be used. If you abort the BOM
+file part assignment process then you can pick up where you left off at another time if required because as each part is entered the BOM
 file is updated.
 
 
@@ -293,7 +327,7 @@ INFO:  CS - Enter a list of field/column sizes.
 INFO:  MA - Enter the maximum number of parts to display.
 INFO:  BA - JLCPCB Basic parts list.
 INFO:  
-INPUT: Option: 
+INPUT: Option:
 ```
 
 This menu provides a way to search the parts database.
@@ -358,7 +392,7 @@ INPUT: Option: s
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 | 1    | C375 | 2772    | ADS1115IDGSR              | MSOP-10_3.0x3.0x0.5P      | Extended | 1-9:$6.33 10 | 2,4 Differential, Single Ended 16 860 VSSOP-10 Analog To Digital Converters (ADCs) ROHS    |
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-INPUT: Press enter to return to parts selection: 
+INPUT: Press enter to return to parts selection:
 ```
 
 Once you have the JLCPCB part number you can copy it into the terminal window under [Creating and assembling a PCB using JLCPCB](#Creating and assembling a PCB using JLCPCB) and an then move on to the next part.
@@ -403,8 +437,3 @@ optional arguments:
   -v, --view_zip    View zip file. This option can be used if the user only wants to view the contents of an existing zip files containing PCB gerber files.
   --gerbview        Use gerbview (Included with KiCad) not the default gerbv program which must be installed separately ('sudo apt install gerbv') to view gerbers.
 ```
-
-
-
-
-
