@@ -168,15 +168,6 @@ INPUT: Overwrite ? y/n: n
 If you select 'y' then all previous data is overwritten and you'll need to enter all assembly data
 again. Selecting 'n' will start from where you left the project previously.
 
-If at this point you get the following error then you have not created the BOM files using KiCad.
-
-```
-ERROR: Failed to find the BOM file (myproject.csv) in ['.', '..'].
-```
-
-If this occurs then open KiCad PCB and select 'File / Fabrication Outputs / BOM)...'. Then select the 'Save' button. When you've created this file restart pcbzip.
-
-
 If at this point you get the following error then you have not created the placement files using KiCad.
 
 ```
@@ -184,6 +175,14 @@ ERROR: Failed to find the placement file (myproject-top-pos.csv) in ['.', '..'].
 ```
 
 If this occurs then open KiCad PCB and select 'File / Fabrication Outputs / Component Placement (pos)...'. Then select the 'Generate Position File' button. When you've created this file restart pcbzip.
+
+If at this point you get the following error then you have not created the BOM files using KiCad.
+
+```
+ERROR: Failed to find the BOM file (myproject.csv) in ['.', '..'].
+```
+
+If this occurs then open KiCad PCB and select 'File / Fabrication Outputs / BOM)...'. Then select the 'Save' button. When you've created this file restart pcbzip.
 
 The first time that you run pcbzip yu'll be asked if you wish to fixup the BOM file format as shown below.
 
