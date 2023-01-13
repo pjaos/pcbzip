@@ -1,7 +1,7 @@
 import setuptools
 
 MODULE_NAME    = "pcbzip"                                                       # The python module name
-VERSION        = "3.3"                                                          # The version of the application
+VERSION        = "3.4"                                                          # The version of the application
 AUTHOR         = "Paul Austen"                                                  # The name of the applications author
 AUTHOR_EMAIL   = "pausten.os@gmail.com"                                         # The email address of the author
 DESCRIPTION    = "A tool to package Kicad gerber files for MFG."                # A short description of the application
@@ -21,7 +21,7 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     packages=setuptools.find_packages(),
     include_package_data=True,
-    package_data={'': ['jlcpcb_kicad_v6_plot.png', 'jlcpcb_kicad_v6_drill.png','jclpcb_kicad_v6_placement.png']},
+    package_data={'': ['jlcpcb_kicad_v6_plot.png', 'jlcpcb_kicad_v6_drill.png','jlcpcb_kicad_v6_placement.png']},
     classifiers=[
         "License :: %s" % (LICENSE),
         "Operating System :: OS Independent",
