@@ -361,6 +361,8 @@ class PCBFileProcessor(object):
                 self._info("Removed the {} folder.".format(self._pcbFileFolder))
                 makedirs(self._pcbFileFolder)
                 self._info("Created the {} folder.".format(self._pcbFileFolder))
+            else:
+                raise Exception("Aborting updates to {}".format(self._pcbFileFolder))
         else:
             makedirs(self._pcbFileFolder)
             self._info("Created the {} folder.".format(self._pcbFileFolder))
