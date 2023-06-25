@@ -190,7 +190,6 @@ class PCBFileProcessor(object):
            which must be installed on the local machine.
            @param zipFile The zip file to create and view.
            @param gerbview If True use gerbview rather than the default gerbv program."""
-
         #Create a temp dir
         dirpath = tempfile.mkdtemp()
 
@@ -309,8 +308,9 @@ class PCBFileProcessor(object):
                 raise MakeError("Not all required files are present (%s are missing)." % (requiredFiles) )
 
             self._uio.info("Copied Gerber files to {}".format(self._pcbFileFolder))
-            self._processBOMFiles()
-            self._processPlacementFiles()
+            if self._options.assy:
+                self._processBOMFiles()
+                self._processPlacementFiles()
 
             zf = zipfile.ZipFile(opFile, "w")
             for f in gerberFileList:
@@ -329,6 +329,7 @@ class PCBFileProcessor(object):
 
         plotImage = join(dirname(__file__), "jlcpcb_kicad_v6_plot.png")
         drillImage = join(dirname(__file__), "jlcpcb_kicad_v6_drill.png")
+        bomImage = join(dirname(__file__), "jlcpcb_kicad_v6_bom.png")
         placementImage = join(dirname(__file__), "jlcpcb_kicad_v6_placement.png")
 
         if not isfile(plotImage):
@@ -337,6 +338,9 @@ class PCBFileProcessor(object):
         if not isfile(drillImage):
             raise Exception("{} file not found.".format(drillImage))
 
+        if not isfile(bomImage):
+            raise Exception("{} file not found.".format(bomImage))
+
         if not isfile(placementImage):
             raise Exception("{} file not found.".format(placementImage))
 
@@ -344,6 +348,9 @@ class PCBFileProcessor(object):
         im.show()
 
         im = Image.open(drillImage)
+        im.show()
+
+        im = Image.open(bomImage)
         im.show()
 
         im = Image.open(placementImage)
@@ -460,19 +467,32 @@ class PCBFileProcessor(object):
         bomFileFound = None
         searchPaths = PCBFileProcessor.ASSY_SEARCH_PATHS
         bomFileName = "{}.csv".format(self._projectName)
+        expectedBOMFileList = []
         for bomPath in searchPaths:
             bomFile = path.join(bomPath, bomFileName)
+            expectedBOMFileList.append(bomFile)
             if path.isfile(bomFile):
                 bomFileFound = bomFile
                 self._uio.info("Found {} BOM file.".format(bomFileFound))
                 break
 
+        if bomFileFound is None:
+            self._uio.info("Possible BOM input files.")
+            for expectedBOMFile in expectedBOMFileList:
+                self._uio.info(expectedBOMFile)
+            raise Exception("Unable to find any of the above BOM files.")
+
         # We work on a copy of the BOM file in the assy output folder with the name that JLCPCB require
         bomOutputFile = join(self._pcbFileFolder, "{}_{}_bom.csv".format(self._projectName, self._projectVersion) )
-        if self._overWrite:
+        if os.path.isfile(bomOutputFile):
+            if self._overWrite:
+                shutil.copy(bomFileFound, bomOutputFile)
+                self._info("Removed old {} file.".format(bomOutputFile))
+                self._info("Copied {} to {}".format(bomFile, bomOutputFile))
+        else:
             shutil.copy(bomFileFound, bomOutputFile)
-            self._info("Copied {} to {}".format(bomFile, bomOutputFile))
-
+            self._info("Copied {} to {}".format(bomFile, bomOutputFile))            
+                            
         self._checkBOMFormat(bomOutputFile)
 
     def _getBOMFieldList(self, line):
@@ -553,8 +573,7 @@ if __name__ == "__main__":
 
         else:
             zipFile = pcbFileProcessor.zipFiles()
-# PJA
-#            pcbFileProcessor.gerbvFiles(zipFile, options.gerbview)
+            pcbFileProcessor.gerbvFiles(zipFile, options.gerbview)
 
     #If the program throws a system exit exception
     except SystemExit:
