@@ -308,7 +308,7 @@ class PCBFileProcessor(object):
                 raise MakeError("Not all required files are present (%s are missing)." % (requiredFiles) )
 
             self._uio.info("Copied Gerber files to {}".format(self._pcbFileFolder))
-            if self._options.assy:
+            if not self._options.no_assy:
                 self._processBOMFiles()
                 self._processPlacementFiles()
 
@@ -548,11 +548,11 @@ if __name__ == "__main__":
     try:
         parser = argparse.ArgumentParser(description="Helper program for building PCB gerber zip files prior to MFG.", formatter_class=argparse.RawDescriptionHelpFormatter)
         parser.add_argument("-d", "--debug",        help="Enable debugging.",     action='store_true')
-        parser.add_argument("-a", "--assy",         help="In adition to the gerber files process the BOM and component placement files for PCB assembly.", action="store_true")
         parser.add_argument("-n", "--no_preview",   help="Do not preview files. The default is to preview the gerber files using either gerbv or the gerbview programs.", action='store_true')
         parser.add_argument("-s",                   help="Show the Kicad settings required to generate gerbers for JLCPCB. Also the Kicad/JLCPCB helper link is opened using the default web browser.", action="store_true")
         parser.add_argument("-v", "--view_zip",     help="The gerber zip file to view. This option can be used if the user only wants to view the contents of an existing zip files containing PCB gerber files.")
         parser.add_argument("--gerbview",           help="Use gerbview (Included with KiCad) not the default gerbv program which must be installed separately ('sudo apt install gerbv') to view gerbers.", action="store_true")
+        parser.add_argument("--no_assy",            help="In adition to the gerber files process the BOM and component placement files for PCB assembly.", action="store_true")
 
         options = parser.parse_args()
 
